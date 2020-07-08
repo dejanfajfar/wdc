@@ -30,4 +30,4 @@ jobs:
       run: make lint
 
     - name: Run unit tests
-      run: make tests
+      run: make test
