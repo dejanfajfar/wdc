@@ -9,3 +9,6 @@ init:
 
 test:
 	python -m unittest discover tests "*_tests.py"
+
+install:
+	python setup.py install

@@ -1,3 +1,11 @@
+from .helper.time import WdcTime
 
-def calc_workday(start_time, break_duration, workday_duration):
-    pass
+
+def calc_workday_end(start_time: str, break_duration: int, workday_duration: str):
+    start = WdcTime(start_time)
+    duration = WdcTime(workday_duration)
+
+    result = start + duration
+    result.add_minutes(break_duration)
+
+    return result

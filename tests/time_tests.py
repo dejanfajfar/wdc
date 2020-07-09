@@ -1,6 +1,6 @@
 import unittest
 
-from wdc.time import WdcTime
+from wdc.helper.time import WdcTime
 
 
 class WdcTimeFixture(unittest.TestCase):
@@ -68,3 +68,7 @@ class WdcTimeFixture(unittest.TestCase):
         test_object.add_minutes(31)
         self.assertEqual(test_object.minutes, "01")
         self.assertEqual(test_object.hours, "09")
+
+    def test_to_string(self):
+        test_object = WdcTime("0835")
+        self.assertEqual(test_object.__str__(), "0835")

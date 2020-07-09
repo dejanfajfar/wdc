@@ -50,3 +50,6 @@ class WdcTime(object):
         if (self_minutes + minutes) // 60 != 0:
             self.add_hours((self_minutes + minutes) // 60)
         return self
+
+    def __str__(self):
+        return self.__rawTime

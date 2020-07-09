@@ -1,5 +1,7 @@
 import click
 
+from .calculator import calc_workday_end
+
 
 @click.group()
 @click.option('--debug/--no-debug', default=False)
@@ -14,8 +16,27 @@ def cli(ctx, debug):
 
 @cli.command()
 @click.pass_context
-def sync(ctx):
-    click.echo('Debug is %s' % (ctx.obj['DEBUG'] and 'on' or 'off'))
+@click.argument(
+    'workday_start',
+    type=str)
+@click.option(
+    '-b',
+    '--break_duration',
+    default=30,
+    show_default=True,
+    type=int,
+    help='The duration of the lunch break in minutes')
+@click.option(
+    '-d',
+    '--workday_duration',
+    default='0745',
+    show_default=True,
+    type=str,
+    help='The duration of the standard workday given in military 24h time')
+def calc(ctx, workday_start, break_duration, workday_duration):
+    wd_end = calc_workday_end(workday_start, break_duration, workday_duration)
+
+    print(wd_end)
 
 
 if __name__ == '__main__':

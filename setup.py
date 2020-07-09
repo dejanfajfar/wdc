@@ -3,5 +3,12 @@ from setuptools import setup, find_packages
 setup(
     name="wdc",
     version="0.1",
-    packages=find_packages()
+    packages=['wdc'],
+    entry_points = {
+        "console_scripts": ['wdc = wdc.runner:cli']
+        },
+
+    author='Dejan Fajfar',
+    author_email='dejan@fajfar.com',
+    url='https://github.com/dejanfajfar/wdc'
 )
