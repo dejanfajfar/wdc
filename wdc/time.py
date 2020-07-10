@@ -1,10 +1,12 @@
 import re
 
+def is_time_valid(time: str):
+    return re.match(r"(([01][0-9])|(2[0-3]))[0-5][0-9]", time)
 
 class WdcTime(object):
 
     def __init__(self, time):
-        if re.match(r"[0-2]\d[0-5]\d", time):
+        if is_time_valid(time):
             self.__rawTime = time
         else:
             raise ValueError("{0} must be between 0 and 2359".format(time))
@@ -53,3 +55,4 @@ class WdcTime(object):
 
     def __str__(self):
         return self.__rawTime
+
