@@ -13,4 +13,4 @@ test:
 install:
 	python setup.py install
 
-ci: freeze lint test
+ci: lint test
