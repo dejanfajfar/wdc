@@ -79,7 +79,7 @@ class IsTimeValidFixture(unittest.TestCase):
         self.assertTrue(is_time_valid("0800"))
         self.assertTrue(is_time_valid("0000"))
         self.assertTrue(is_time_valid("2359"))
-    
+
     def test_invalid(self):
         self.assertFalse(is_time_valid("2400"))
         self.assertFalse(is_time_valid("2360"))

@@ -1,7 +1,9 @@
 import re
 
+
 def is_time_valid(time: str):
     return re.match(r"(([01][0-9])|(2[0-3]))[0-5][0-9]", time)
+
 
 class WdcTime(object):
 
@@ -55,4 +57,3 @@ class WdcTime(object):
 
     def __str__(self):
         return self.__rawTime
-
