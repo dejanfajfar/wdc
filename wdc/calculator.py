@@ -1,4 +1,4 @@
-from .time import WdcTime
+from wdc.time import WdcTime
 
 
 def calc_workday_end(start_time: str, break_duration: int, workday_duration: str):
