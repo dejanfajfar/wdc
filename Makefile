@@ -6,3 +6,13 @@ freeze:
 
 init:
 	pip install -r requirements.txt
+
+test:
+	python -m unittest discover tests "*_tests.py"
+
+install:
+	python setup.py install
+
+ci: lint test
+
+
