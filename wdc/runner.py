@@ -2,6 +2,7 @@ import click
 
 from wdc.time import is_time_valid
 from wdc.calculator import calc_workday_end
+from wdc.controller.work_day import append_line
 
 
 def validate_time_callback(ctx, param, value):
@@ -49,6 +50,16 @@ def calc(ctx, workday_start, break_duration, workday_duration):
     wd_end = calc_workday_end(workday_start, break_duration, workday_duration)
 
     print(wd_end)
+
+
+@cli.command()
+@click.pass_context
+@click.argument(
+    'task_start',
+    type=str,
+    required=False)
+def start(ctx, task_start, tags, message):
+    pass
 
 
 if __name__ == '__main__':

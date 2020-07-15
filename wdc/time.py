@@ -1,9 +1,13 @@
 import re
+from datetime import datetime
 
 
-def is_time_valid(time: str):
+def is_time_valid(time: str) -> bool:
     return re.match(r"(([01][0-9])|(2[0-3]))[0-5][0-9]", time)
 
+def today() -> str:
+    now = datetime.now()
+    return now.strftime('%Y-%m-%d')
 
 class WdcTime(object):
 
