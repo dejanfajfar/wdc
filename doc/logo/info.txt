@@ -1,0 +1,14 @@
+
+Hope you enjoy your new logo, here are the people that
+made your beautiful logo happen :)
+font name: SquadaOne-Regular
+font link: https://fonts.google.com/specimen/Squada+One
+font author: Joe Prince
+font author site: https://dribbble.com/joeprince
+
+
+icon designer: Bart Laugs
+icon designer link: /bartlaugs
+        
+{"bg":"#01252C","icon":"#88DF95","font":"#FFFFFF","slogan":"#ffffff"}
+      
