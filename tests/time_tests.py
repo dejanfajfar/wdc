@@ -1,6 +1,6 @@
 import unittest
 from freezegun import freeze_time
-from wdc.time import WdcTime, is_time_valid, today
+from wdc.time import WdcTime, is_time_valid, today, is_date_valid
 
 
 class WdcTimeFixture(unittest.TestCase):
@@ -83,9 +83,23 @@ class IsTimeValidFixture(unittest.TestCase):
     def test_invalid(self):
         self.assertFalse(is_time_valid("2400"))
         self.assertFalse(is_time_valid("2360"))
+        self.assertFalse(is_time_valid("9999"))
+
 
 class TodayFixture(unittest.TestCase):
     @freeze_time('2019-10-25')
     def test_correct_format(self):
         test_result = today()
         self.assertEqual('2019-10-25', test_result)
+
+
+class IsDateValidFixture(unittest.TestCase):
+    def test_valid(self):
+        self.assertTrue(is_date_valid('2020-10-25'))
+        self.assertTrue(is_date_valid('1980-07-01'))
+
+    def test_invalid(self):
+        self.assertFalse(is_date_valid('2000-7-1'))
+        self.assertFalse(is_date_valid('1800-07-31'))
+        self.assertFalse(is_date_valid('2000-40-01'))
+        self.assertFalse(is_date_valid('2000-07-40'))

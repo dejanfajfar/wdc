@@ -4,6 +4,8 @@
 
 ![CI](https://github.com/dejanfajfar/wdc/workflows/CI/badge.svg)
 
+![Logo](doc/logo/cover.png)
+
 # Purpose
 
 The purpose of **wdc** is to provide a simple _CLI_ application for time tracking.
@@ -124,4 +126,60 @@ An 8 hour workday starting at 8:00
 
 ```bash
 $ wdc 0800 -d 0800
+```
+
+## start
+
+Used to start a new work day task and store it.
+
+> In order to start a new task you do not have to call an end command. Just start the new task and the old one will be automatically closed
+
+**sample**
+
+```bash
+$ wdc start 0800 -t Customer -t Project -m The task description
+```
+
+### Arguments
+
+The time at which the task started in the **hhmm** format
+
+### Options
+
+#### -t, --tag
+
+Provide a generic tag to associate with the task.
+
+Multiple tags can be provided, if so then each has to be provided with its own ```-t``` or ```--tag``` option.
+
+#### -m, --message
+
+Provide a descriptive message to associate with the task
+
+#### -e, --end
+
+Provide an optional end time for the task in **hhmm** format
+
+#### -d, --date
+
+Provide the date to which this task should be associated to.
+
+##### Examples
+
+Start an anonymous task
+
+```bash
+$ wdc start 0800
+```
+
+Start a task with a know end time
+
+```bash
+$ wdc start 0800 -e 0900
+```
+
+Start a task for a date other than today
+
+```bash
+wdc start 0800 -d 2020-01-01
 ```

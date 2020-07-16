@@ -5,9 +5,20 @@ from datetime import datetime
 def is_time_valid(time: str) -> bool:
     return re.match(r"(([01][0-9])|(2[0-3]))[0-5][0-9]", time)
 
+
+def is_date_valid(date: str) -> bool:
+    return re.match(r"(19|20)\d\d-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])", date)
+
+
 def today() -> str:
     now = datetime.now()
     return now.strftime('%Y-%m-%d')
+
+
+def today_no_date() -> str:
+    now = datetime.now()
+    return now.strftime('%Y%m')
+
 
 class WdcTime(object):
 

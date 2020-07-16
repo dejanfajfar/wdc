@@ -1,6 +1,11 @@
 lint:
 	flake8 .
 
+pep8:
+	find wdc/ -name '*.py' -exec autopep8 --in-place '{}' \;
+	find tests/ -name '*.py' -exec autopep8 --in-place '{}' \;
+	autopep8 --in-place setup.py
+
 freeze:
 	pip freeze > requirements.txt
 
@@ -13,5 +18,5 @@ test:
 install:
 	python setup.py install
 
-ci: lint test
+ci: pep8 lint test
 
