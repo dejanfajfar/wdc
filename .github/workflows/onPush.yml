@@ -42,3 +42,26 @@ jobs:
       
     - name: Run unit tests
       run: make test
+
+  build:
+    needs: [lint, test]
+    runs-on: ubuntu_latest
+    steps:
+      - uses: actions/checkout@v2
+    
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Python Dependency Installation
+        uses: py-actions/py-dependency-install@v2.0.2
+        
+      - name: Create distribution package
+        run: make dist
+        
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: package
+          path: dist/
