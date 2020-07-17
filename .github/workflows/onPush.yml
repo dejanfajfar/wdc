@@ -7,14 +7,14 @@ on: [push, pull_request]
 
 
 jobs:
-  
+
   # Ensure that the formatting of the code is consistent with PEP8 standards
   lint:
     runs-on: ubuntu-latest
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
-    
+
     - name: Setup Python
       uses: actions/setup-python@v2
       with:
@@ -22,16 +22,16 @@ jobs:
 
     - name: Python Dependency Installation
       uses: py-actions/py-dependency-install@v2.0.2
-      
+
     - name: Run linter
       run: make lint
-  
+
   test:
     needs: [lint]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    
+
     - name: Setup Python
       uses: actions/setup-python@v2
       with:
@@ -39,16 +39,16 @@ jobs:
 
     - name: Python Dependency Installation
       uses: py-actions/py-dependency-install@v2.0.2
-      
+
     - name: Run unit tests
       run: make test
 
   build:
     needs: [lint, test]
-    runs-on: ubuntu_latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-    
+
       - name: Setup Python
         uses: actions/setup-python@v2
         with:
@@ -56,10 +56,10 @@ jobs:
 
       - name: Python Dependency Installation
         uses: py-actions/py-dependency-install@v2.0.2
-        
+
       - name: Create distribution package
         run: make dist
-        
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
