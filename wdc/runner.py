@@ -1,8 +1,8 @@
 import click
 
-from wdc.time import is_time_valid
+from wdc.time import is_time_valid, is_date_valid, today
 from wdc.calculator import calc_workday_end
-from wdc.controller.work_day import start_work_task
+from wdc.controller.work_day import start_work_task, list_tasks, end_last_task
 
 
 def validate_time_callback(ctx, param, value):
@@ -12,6 +12,13 @@ def validate_time_callback(ctx, param, value):
         return value
     else:
         raise click.BadParameter(f'{value} is not a valid time')
+
+
+def validate_date_callback(ctx, param, value):
+    if is_date_valid(value):
+        return value
+    else:
+        return today()
 
 
 @click.group()
@@ -89,6 +96,7 @@ def calc(ctx, workday_start, break_duration, workday_duration):
     '--date',
     default='',
     show_default=True,
+    callback=validate_date_callback,
     type=str,
     help='The date at which the task has happened')
 def start(ctx, task_start, end, tag, message, date):
@@ -97,6 +105,41 @@ def start(ctx, task_start, end, tag, message, date):
         ctx.exit()
 
     start_work_task(task_start, end, tag, message, date)
+
+
+@cli.command('list')
+@click.pass_context
+@click.option(
+    '-d',
+    '--date',
+    callback=validate_date_callback,
+    type=str,
+    help='The date for which the tasks should be shown ')
+def list_all(ctx, date):
+    tasks = list_tasks(date)
+
+    for task in tasks:
+        print(task)
+
+
+@cli.command()
+@click.pass_context
+@click.option(
+    '-d',
+    '--date',
+    callback=validate_date_callback,
+    type=str,
+    help='The date for which the last task should be closed')
+@click.option(
+    '-e',
+    '--end',
+    default='',
+    show_default=True,
+    type=str,
+    callback=validate_time_callback,
+    help='The time at which the work task was finished')
+def end(ctx, date, end):
+    end_last_task(date, end)
 
 
 if __name__ == '__main__':

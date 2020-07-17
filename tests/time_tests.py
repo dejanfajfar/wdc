@@ -1,6 +1,6 @@
 import unittest
 from freezegun import freeze_time
-from wdc.time import WdcTime, is_time_valid, today, is_date_valid
+from wdc.time import WdcTime, is_time_valid, today, is_date_valid, to_date_no_day, timestamp
 
 
 class WdcTimeFixture(unittest.TestCase):
@@ -73,6 +73,16 @@ class WdcTimeFixture(unittest.TestCase):
         test_object = WdcTime("0835")
         self.assertEqual(test_object.__str__(), "0835")
 
+    @freeze_time('2020-10-25 15:16')
+    def test_now_two_digit(self):
+        test_object = WdcTime.now()
+        self.assertEqual('1516', str(test_object))
+
+    @freeze_time('2020-10-25 08:08')
+    def test_now_one_digit(self):
+        test_object = WdcTime.now()
+        self.assertEqual('0808', str(test_object))
+
 
 class IsTimeValidFixture(unittest.TestCase):
     def test_valid(self):
@@ -103,3 +113,21 @@ class IsDateValidFixture(unittest.TestCase):
         self.assertFalse(is_date_valid('1800-07-31'))
         self.assertFalse(is_date_valid('2000-40-01'))
         self.assertFalse(is_date_valid('2000-07-40'))
+        self.assertFalse(is_date_valid(''))
+
+
+class ToDateNoDayFixture(unittest.TestCase):
+    def test_valid(self):
+        test_result = to_date_no_day('2020-10-25')
+
+        self.assertEqual('202010', test_result)
+
+    def test_invalid_date_string(self):
+        self.assertRaises(ValueError, to_date_no_day, '99')
+
+
+class TimestampFixture(unittest.TestCase):
+    @freeze_time('2020-10-25 10:00:00')
+    def test_valid(self):
+        test_object = timestamp()
+        self.assertEqual('1603620000000', test_object)

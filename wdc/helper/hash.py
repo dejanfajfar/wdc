@@ -1,2 +1,5 @@
+import secrets
+
+
 def generate_hash(string: str) -> str:
-    return abs(hash(string)) % (10 ** 8)
+    return secrets.token_hex(4)

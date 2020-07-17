@@ -2,6 +2,7 @@ import unittest
 from unittest.mock import patch
 from click.testing import CliRunner
 from wdc.runner import cli
+from freezegun import freeze_time
 
 
 class CalcCommandFixture(unittest.TestCase):
@@ -71,8 +72,15 @@ class StartWorkTaskFixture(unittest.TestCase):
 
     def test_go(self):
         self.cli_runner.invoke(cli, ['start', '0800', '--tag', 't1', '--tag', 't2', '--end',
-                                     '0900', '--message', 'description', '--date', '2020-10-25'])
+                                     '0900', '--message', 'description'])
+        self.cli_runner.invoke(cli, ['end'])
+        # result = self.cli_runner.invoke(cli, ['list'])
+        # print(result.output)
 
+        # result = self.cli_runner.invoke(cli, ['--help'])
+        # print(result.output)
+
+    @freeze_time('2020-07-25')
     @patch('wdc.runner.start_work_task')
     def test_valid_only_start(self, mock_controller):
         self.cli_runner.invoke(cli, ['start', '0800'])
@@ -84,7 +92,7 @@ class StartWorkTaskFixture(unittest.TestCase):
         self.assertEqual('', call_args[1])
         self.assertEqual((), call_args[2])
         self.assertEqual('', call_args[3])
-        self.assertEqual('', call_args[4])
+        self.assertEqual('2020-07-25', call_args[4])
 
     @patch('wdc.runner.start_work_task')
     def test_invalid_start_time(self, mock_controller):
