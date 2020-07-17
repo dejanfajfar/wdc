@@ -20,3 +20,5 @@ install:
 
 ci: pep8 lint test
 
+dist:
+	python setup.py sdist --formats=gztar,zip
