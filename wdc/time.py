@@ -1,8 +1,41 @@
 import re
+from datetime import datetime
+from time import time
 
 
-def is_time_valid(time: str):
+def is_time_valid(time: str) -> bool:
+    if time is None:
+        return False
     return re.match(r"(([01][0-9])|(2[0-3]))[0-5][0-9]", time)
+
+
+def is_date_valid(date: str) -> bool:
+    if date is None:
+        return False
+    return re.match(r"(19|20)\d\d-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])", date)
+
+
+def today() -> str:
+    now = datetime.now()
+    return now.strftime('%Y-%m-%d')
+
+
+def to_date_no_day(date_string: str) -> str:
+    if not is_date_valid(date_string):
+        raise ValueError(f'{date_string} is not a valid date string')
+
+    date = datetime.strptime(date_string, '%Y-%m-%d')
+
+    return date.strftime('%Y%m')
+
+
+def today_no_date() -> str:
+    now = datetime.now()
+    return now.strftime('%Y%m')
+
+
+def timestamp() -> str:
+    return str(int(time() * 1000))
 
 
 class WdcTime(object):
@@ -12,6 +45,11 @@ class WdcTime(object):
             self.__rawTime = time
         else:
             raise ValueError("{0} must be between 0 and 2359".format(time))
+
+    @staticmethod
+    def now():
+        now = datetime.now()
+        return WdcTime(f'{now.hour:02d}{now.minute:02d}')
 
     @property
     def minutes(self):

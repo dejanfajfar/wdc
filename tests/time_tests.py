@@ -1,6 +1,6 @@
 import unittest
-
-from wdc.time import WdcTime, is_time_valid
+from freezegun import freeze_time
+from wdc.time import WdcTime, is_time_valid, today, is_date_valid, to_date_no_day, timestamp
 
 
 class WdcTimeFixture(unittest.TestCase):
@@ -73,6 +73,16 @@ class WdcTimeFixture(unittest.TestCase):
         test_object = WdcTime("0835")
         self.assertEqual(test_object.__str__(), "0835")
 
+    @freeze_time('2020-10-25 15:16')
+    def test_now_two_digit(self):
+        test_object = WdcTime.now()
+        self.assertEqual('1516', str(test_object))
+
+    @freeze_time('2020-10-25 08:08')
+    def test_now_one_digit(self):
+        test_object = WdcTime.now()
+        self.assertEqual('0808', str(test_object))
+
 
 class IsTimeValidFixture(unittest.TestCase):
     def test_valid(self):
@@ -83,3 +93,41 @@ class IsTimeValidFixture(unittest.TestCase):
     def test_invalid(self):
         self.assertFalse(is_time_valid("2400"))
         self.assertFalse(is_time_valid("2360"))
+        self.assertFalse(is_time_valid("9999"))
+
+
+class TodayFixture(unittest.TestCase):
+    @freeze_time('2019-10-25')
+    def test_correct_format(self):
+        test_result = today()
+        self.assertEqual('2019-10-25', test_result)
+
+
+class IsDateValidFixture(unittest.TestCase):
+    def test_valid(self):
+        self.assertTrue(is_date_valid('2020-10-25'))
+        self.assertTrue(is_date_valid('1980-07-01'))
+
+    def test_invalid(self):
+        self.assertFalse(is_date_valid('2000-7-1'))
+        self.assertFalse(is_date_valid('1800-07-31'))
+        self.assertFalse(is_date_valid('2000-40-01'))
+        self.assertFalse(is_date_valid('2000-07-40'))
+        self.assertFalse(is_date_valid(''))
+
+
+class ToDateNoDayFixture(unittest.TestCase):
+    def test_valid(self):
+        test_result = to_date_no_day('2020-10-25')
+
+        self.assertEqual('202010', test_result)
+
+    def test_invalid_date_string(self):
+        self.assertRaises(ValueError, to_date_no_day, '99')
+
+
+class TimestampFixture(unittest.TestCase):
+    @freeze_time('2020-10-25 10:00:00')
+    def test_valid(self):
+        test_object = timestamp()
+        self.assertEqual('1603620000000', test_object)
