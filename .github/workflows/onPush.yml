@@ -8,60 +8,79 @@ on: [push, pull_request]
 
 jobs:
 
-  # Ensure that the formatting of the code is consistent with PEP8 standards
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-    - uses: actions/checkout@v2
+    # Ensure that the formatting of the code is consistent with PEP8 standards
+    lint:
+        runs-on: ubuntu-latest
+        steps:
+            # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+            - uses: actions/checkout@v2
 
-    - name: Setup Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.8
+            - name: Setup Python
+              uses: actions/setup-python@v2
+              with:
+                  python-version: 3.8
 
-    - name: Python Dependency Installation
-      uses: py-actions/py-dependency-install@v2.0.2
+            - name: Python Dependency Installation
+              uses: py-actions/py-dependency-install@v2.0.2
 
-    - name: Run linter
-      run: make lint
+            - name: Run linter
+              run: make lint
 
-  test:
-    needs: [lint]
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
+    test:
+        needs: [lint]
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
 
-    - name: Setup Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.8
+            - name: Setup Python
+              uses: actions/setup-python@v2
+              with:
+                  python-version: 3.8
 
-    - name: Python Dependency Installation
-      uses: py-actions/py-dependency-install@v2.0.2
+            - name: Python Dependency Installation
+              uses: py-actions/py-dependency-install@v2.0.2
 
-    - name: Run unit tests
-      run: make test
+            - name: Run unit tests
+              run: make test
 
-  build:
-    needs: [lint, test]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
+    build:
+        needs: [lint, test]
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
 
-      - name: Setup Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.8
+            - name: Setup Python
+              uses: actions/setup-python@v2
+              with:
+                  python-version: 3.8
 
-      - name: Python Dependency Installation
-        uses: py-actions/py-dependency-install@v2.0.2
+            - name: Python Dependency Installation
+              uses: py-actions/py-dependency-install@v2.0.2
 
-      - name: Create distribution package
-        run: make dist
+            - name: Create distribution package
+              run: make dist
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: package
-          path: dist/
+            - name: Upload artifacts
+              uses: actions/upload-artifact@v2
+              with:
+                  name: wdc
+                  path: dist/
+
+    release:
+        needs: [build]
+        runs-on: ubuntu-latest
+        steps:
+            - name: Create Release
+                id: create_release
+                uses: actions/create-release@v1
+                env:
+                    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+                with:
+                    tag_name: ${{ github.ref }}
+                    release_name: Release ${{ github.ref }}
+                    body: |
+                        Changes in this Release
+                        - First Change
+                        - Second Change
+                    draft: false
+                    prerelease: true
