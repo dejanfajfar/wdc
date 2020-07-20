@@ -71,21 +71,33 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Create distribution package
+        run: make dist
       - name: Read file
         id: version
         uses: juliangruber/read-file-action@v1.0.0
         with:
           path: version
       - name: Create Release
+        id: create_release
         uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ steps.version.outputs.content }}
-          release_name: Release ${{ steps.version.outputs.content }}
+          tag_name: ${{ steps.version.outputs.content }}.${{ github.run_number }}
+          release_name: Release ${{ steps.version.outputs.content }}.${{ github.run_number }}
           body: |
             Changes in this Release
             - First Change
             - Second Change
           draft: false
           prerelease: true
+      - name: Upload Release Asset
+        id: upload-release-asset 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} 
+          asset_path: ./dist/*.tar.gz
+          asset_name: wdc.tar.gz
