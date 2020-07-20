@@ -8,4 +8,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Add
 - ```calc``` command
 - ```start``` command
-- ```list_all``` command
+- ```list``` command

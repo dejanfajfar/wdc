@@ -1,44 +1,38 @@
-# This is a basic workflow to help you get started with Actions
+name: CI
 
-name: CI_CD
-
-# runs when ever code is pushed or a pull request is created
-on: [push, pull_request]
-
+on: [push]
 
 jobs:
-  
-  # Ensure that the formatting of the code is consistent with PEP8 standards
+
   lint:
     runs-on: ubuntu-latest
     steps:
-    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-    - uses: actions/checkout@v2
-    
-    - name: Setup Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.8
+      - uses: actions/checkout@v2
 
-    - name: Python Dependency Installation
-      uses: py-actions/py-dependency-install@v2.0.2
-      
-    - name: Run linter
-      run: make lint
-  
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Python Dependency Installation
+        uses: py-actions/py-dependency-install@v2.0.2
+
+      - name: Run linter
+        run: make lint
+
   test:
     needs: [lint]
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    
-    - name: Setup Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.8
+      - uses: actions/checkout@v2
 
-    - name: Python Dependency Installation
-      uses: py-actions/py-dependency-install@v2.0.2
-      
-    - name: Run unit tests
-      run: make test
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Python Dependency Installation
+        uses: py-actions/py-dependency-install@v2.0.2
+
+      - name: Run unit tests
+        run: make test
