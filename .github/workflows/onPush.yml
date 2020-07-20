@@ -1,6 +1,6 @@
 name: CI
 
-on: [push, pull_request]
+on: [push]
 
 jobs:
 
@@ -106,5 +106,27 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./artifacts/wdc-${{ steps.version.outputs.content }}.${{ github.run_number }}.zip
-          asset_name: wdc.zip
+          asset_name: wdc-${{ steps.version.outputs.content }}.${{ github.run_number }}.zip
           asset_content_type: application/zip
+
+      - name: Upload Release Asset
+        id: upload-release-asset-tar
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./artifacts/wdc-${{ steps.version.outputs.content }}.${{ github.run_number }}.tar.gz
+          asset_name: wdc-${{ steps.version.outputs.content }}.${{ github.run_number }}.tar.gz
+          asset_content_type: application/x-tar
+
+      - name: Upload Release Asset
+        id: upload-release-asset-whl
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./artifacts/wdc-${{ steps.version.outputs.content }}.${{ github.run_number }}-py3-none-any.whl
+          asset_name: wwdc-${{ steps.version.outputs.content }}.${{ github.run_number }}-py3-none-any.whl
+          asset_content_type: application/octet-stream

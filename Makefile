@@ -44,6 +44,7 @@ ci: pep8 lint test
 # Creates distribution packages for the wdc
 dist: clean
 	python setup.py sdist --formats=gztar,zip
+	python setup.py bdist_wheel
 
 #
 # Removed all generated directories

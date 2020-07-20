@@ -1,6 +1,7 @@
 import os
 
 from setuptools import setup
+from setuptools.dist import Distribution
 
 # The version number is provided in the version file
 version_file = open('version')
@@ -11,6 +12,9 @@ env_version = os.environ.get('WDC_VERSION')
 if env_version is not None and env_version != '':
     version = env_version
 
+class BinaryDistribution(Distribution):
+    def is_pure(self):
+        return False
 
 setup(
     name='wdc',
@@ -23,6 +27,9 @@ setup(
     author='Dejan Fajfar',
     author_email='dejan@fajfar.com',
     url='https://github.com/dejanfajfar/wdc',
+
+    include_package_data=True,
+    distclass=BinaryDistribution,
 
     classifiers=[
         'Development Status :: 3 - Alpha',
