@@ -60,7 +60,7 @@ jobs:
       - name: Create distribution package
         run: make dist
         env:
-          - WDC_VERSION: ${{ steps.version.outputs.content }}.${{ github.run_number }}
+          WDC_VERSION: ${{ steps.version.outputs.content }}.${{ github.run_number }}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
