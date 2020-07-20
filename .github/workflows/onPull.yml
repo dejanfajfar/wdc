@@ -1,6 +1,10 @@
-name: CI
+name: OnPull-Release
 
-on: [push, pull_request]
+on:
+  pull_request:
+    branches:
+      - master
+      - development
 
 jobs:
 
@@ -60,7 +64,7 @@ jobs:
       - name: Create distribution package
         run: make dist
         env:
-          WDC_VERSION: ${{ steps.version.outputs.content }}.${{ github.run_number }}
+          - WDC_VERSION: ${{ steps.version.outputs.content }}.${{ github.run_number }}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
@@ -68,9 +72,10 @@ jobs:
           name: wdc
           path: dist/
 
-  release:
+  release-github:
     needs: [build]
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
     steps:
       - uses: actions/checkout@v2
 
@@ -96,7 +101,7 @@ jobs:
           release_name: Release ${{ steps.version.outputs.content }}.${{ github.run_number }}
           body: ""
           draft: false
-          prerelease: true
+          prerelease: false
 
       - name: Upload Release Asset
         id: upload-release-asset
@@ -108,3 +113,14 @@ jobs:
           asset_path: ./artifacts/wdc-${{ steps.version.outputs.content }}.${{ github.run_number }}.zip
           asset_name: wdc.zip
           asset_content_type: application/zip
+
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./artifacts/wdc-${{ steps.version.outputs.content }}.${{ github.run_number }}.tar.gz
+          asset_name: wdc.tar.gz
+          asset_content_type: application/x-tar
