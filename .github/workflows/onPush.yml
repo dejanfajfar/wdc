@@ -75,7 +75,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: wdc
-          path: /dist
+          path: dist/
       - name: Read file
         id: version
         uses: juliangruber/read-file-action@v1.0.0
