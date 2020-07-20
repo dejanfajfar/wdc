@@ -46,8 +46,14 @@ def end_last_task(date: str, time: str):
     write_task(task)
 
 
-def list_tasks(date: str) -> List[WdcTask]:
+def list_tasks(date: str, show_all: bool) -> List[WdcTask]:
     if not is_date_valid(date):
         raise ValueError(f'{date} is not a valid date format')
 
-    return all_tasks(date)
+    tasks = all_tasks(date)
+
+    tasks = list(filter(lambda t: t.date == date, tasks))
+
+    tasks.sort(key=lambda t: int(t.timestamp))
+
+    return tasks
