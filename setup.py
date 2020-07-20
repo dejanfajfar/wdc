@@ -12,9 +12,11 @@ env_version = os.environ.get('WDC_VERSION')
 if env_version is not None and env_version != '':
     version = env_version
 
+
 class BinaryDistribution(Distribution):
     def is_pure(self):
         return False
+
 
 setup(
     name='wdc',
