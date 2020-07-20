@@ -1,18 +1,12 @@
-# This is a basic workflow to help you get started with Actions
-
 name: CI_CD
 
-# runs when ever code is pushed or a pull request is created
 on: [push, pull_request]
-
 
 jobs:
 
-  # Ensure that the formatting of the code is consistent with PEP8 standards
   lint:
     runs-on: ubuntu-latest
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
       - name: Setup Python
@@ -57,8 +51,16 @@ jobs:
       - name: Python Dependency Installation
         uses: py-actions/py-dependency-install@v2.0.2
 
+      - name: Read file
+        id: version
+        uses: juliangruber/read-file-action@v1.0.0
+        with:
+          path: version
+
       - name: Create distribution package
         run: make dist
+        env:
+          - WDC_VERSION: ${{ steps.version.outputs.content }}.${{ github.run_number }}
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
@@ -71,16 +73,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+
       - name: Download a Build Artifact
         uses: actions/download-artifact@v2
         with:
           name: wdc
           path: artifacts
+
       - name: Read file
         id: version
         uses: juliangruber/read-file-action@v1.0.0
         with:
           path: version
+
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -92,13 +97,14 @@ jobs:
           body: ""
           draft: false
           prerelease: true
+
       - name: Upload Release Asset
-        id: upload-release-asset 
+        id: upload-release-asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }} 
-          asset_path: ./artifacts/wdc-${{ steps.version.outputs.content }}.zip
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./artifacts/wdc-${{ steps.version.outputs.content }}.${{ github.run_number }}.zip
           asset_name: wdc.zip
           asset_content_type: application/zip
