@@ -21,6 +21,12 @@ class WdcTask(object):
     def is_valid(self) -> bool:
         return is_date_valid(self.date) and is_time_valid(self.start) and is_time_valid(self.end)
 
+    def __eq__(self, other):
+        return self.id == other.id
+
+    def __hash__(self):
+        return hash((self.id))
+
 
 def array_to_task(array: List[str]) -> WdcTask:
     return WdcTask(
@@ -76,7 +82,7 @@ def last_task(date: str) -> WdcTask:
         return array_to_task(row)
 
 
-def all_tasks(date: str) -> List[WdcTask]:
+def read_all_tasks(date: str) -> List[WdcTask]:
     if not is_date_valid(date):
         raise ValueError(f'{date} is not a valid date')
 

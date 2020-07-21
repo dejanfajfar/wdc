@@ -1,4 +1,4 @@
-from wdc.helper.io import WdcTask, all_tasks, last_task, write_task
+from wdc.helper.io import WdcTask, read_all_tasks, last_task, write_task
 from wdc.helper.hash import generate_hash
 from wdc.time import WdcTime, today, is_date_valid, is_time_valid
 
@@ -50,10 +50,22 @@ def list_tasks(date: str, show_all: bool) -> List[WdcTask]:
     if not is_date_valid(date):
         raise ValueError(f'{date} is not a valid date format')
 
-    tasks = all_tasks(date)
+    tasks = read_all_tasks(date)
 
     tasks = list(filter(lambda t: t.date == date, tasks))
 
-    tasks.sort(key=lambda t: int(t.timestamp))
+    if show_all:
+        tasks.sort(key=lambda t: int(t.timestamp))
+        return tasks
 
-    return tasks
+    else:
+        tasks.sort(key=lambda t: int(t.timestamp), reverse=True)
+        return_tasks = []
+        for task in tasks:
+            if task in return_tasks:
+                continue
+            else:
+                return_tasks.append(task)
+
+        return_tasks.sort(key=lambda t: int(t.timestamp))
+        return return_tasks

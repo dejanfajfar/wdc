@@ -76,8 +76,8 @@ class StartWorkTaskFixture(unittest.TestCase):
         # self.cli_runner.invoke(cli, ['start', '0800', '--tag', 't1', '--tag', 't2', '--end',
         #                             '0900', '--message', 'description'])
 
-        result = self.cli_runner.invoke(cli, ['list'])
-        print(result.output)
+        # result = self.cli_runner.invoke(cli, ['list'])
+        # print(result.output)
 
         # result = self.cli_runner.invoke(cli, ['--help'])
         # print(result.output)
@@ -101,6 +101,29 @@ class StartWorkTaskFixture(unittest.TestCase):
         result = self.cli_runner.invoke(cli, ['start', '9999'])
         self.assertIn('9999', result.output)
         mock_controller.assert_not_called()
+
+
+class ListWorkTasksFixture(unittest.TestCase):
+    def setUp(self):
+        self.cli_runner = CliRunner()
+
+    @patch('wdc.runner.list_tasks')
+    def test_valid(self, mock_controller):
+        mock_controller.return_value = [
+            WdcTask(
+                id='test_id',
+                date='2020-10-25',
+                start='0800',
+                end='0900',
+                tags='t1',
+                description='test_description',
+                timestamp='11'
+            )
+        ]
+
+        result = self.cli_runner.invoke(cli, ['list'])
+
+        self.assertIn('│ test_id │ 2020-10-25 │ 08:00 │ 09:00 │ t1   │ test_descr.. │', result.output)
 
 
 class HelperFunctionsFixture(unittest.TestCase):
