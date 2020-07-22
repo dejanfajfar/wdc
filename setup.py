@@ -21,7 +21,11 @@ class BinaryDistribution(Distribution):
 setup(
     name='wdc',
     version=version,
-    packages=['wdc'],
+    packages=[
+        'wdc',
+        'wdc.helper',
+        'wdc.controller'
+    ],
     entry_points={
         'console_scripts': ['wdc = wdc.runner:cli']
     },
@@ -32,6 +36,10 @@ setup(
 
     include_package_data=True,
     distclass=BinaryDistribution,
+    install_requires=[
+        'click',
+        'termtables'
+    ],
 
     classifiers=[
         'Development Status :: 3 - Alpha',
