@@ -1,7 +1,9 @@
 import unittest
 from unittest.mock import patch
 from click.testing import CliRunner
-from wdc.runner import cli
+
+from wdc.helper.io import WdcTask
+from wdc.runner import cli, task_to_printout
 from freezegun import freeze_time
 
 
@@ -70,15 +72,16 @@ class StartWorkTaskFixture(unittest.TestCase):
         self.assertEqual('description', call_args[3])
         self.assertEqual('2020-10-25', call_args[4])
 
+    @unittest.skip('Experimentation integration test')
     def test_go(self):
         self.cli_runner.invoke(cli, ['start', '0800', '--tag', 't1', '--tag', 't2', '--end',
                                      '0900', '--message', 'description'])
-        self.cli_runner.invoke(cli, ['end'])
-        # result = self.cli_runner.invoke(cli, ['list'])
-        # print(result.output)
 
-        # result = self.cli_runner.invoke(cli, ['--help'])
-        # print(result.output)
+        result = self.cli_runner.invoke(cli, ['list'])
+        print(result.output)
+
+        result = self.cli_runner.invoke(cli, ['--help'])
+        print(result.output)
 
     @freeze_time('2020-07-25')
     @patch('wdc.runner.start_work_task')
@@ -99,3 +102,61 @@ class StartWorkTaskFixture(unittest.TestCase):
         result = self.cli_runner.invoke(cli, ['start', '9999'])
         self.assertIn('9999', result.output)
         mock_controller.assert_not_called()
+
+
+class ListWorkTasksFixture(unittest.TestCase):
+    def setUp(self):
+        self.cli_runner = CliRunner()
+
+    @patch('wdc.runner.list_tasks')
+    def test_valid(self, mock_controller):
+        mock_controller.return_value = [
+            WdcTask(
+                id='test_id',
+                date='2020-10-25',
+                start='0800',
+                end='0900',
+                tags='t1',
+                description='test_description',
+                timestamp='11'
+            )
+        ]
+
+        result = self.cli_runner.invoke(cli, ['list'])
+
+        self.assertIn('│ test_id │ 2020-10-25 │ 08:00 │ 09:00 │ t1   │ test_descr.. │', result.output)
+
+    @patch('wdc.runner.list_tasks')
+    def test_minimal_task_valid(self, mock_controller):
+        mock_controller.return_value = [
+            WdcTask(
+                id='test_id',
+                date='2020-10-25',
+                start='0800',
+                end='',
+                tags='',
+                description='',
+                timestamp='11'
+            )
+        ]
+
+        result = self.cli_runner.invoke(cli, ['list'])
+
+        self.assertIn('│ test_id │ 2020-10-25 │ 08:00 │     │      │             │', result.output)
+
+
+class HelperFunctionsFixture(unittest.TestCase):
+    def test_ttask_to_printout_valid(self):
+        test_object = WdcTask(
+            id='testId',
+            date='2020-10-25',
+            start='0800',
+            end='0900',
+            tags='t1',
+            description='testDescription',
+            timestamp='11'
+        )
+
+        result = task_to_printout(test_object)
+
+        self.assertSequenceEqual(result, ['testId', '2020-10-25', '08:00', '09:00', 't1', 'testDescri..'])

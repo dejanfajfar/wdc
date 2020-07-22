@@ -21,6 +21,12 @@ class WdcTask(object):
     def is_valid(self) -> bool:
         return is_date_valid(self.date) and is_time_valid(self.start) and is_time_valid(self.end)
 
+    def __eq__(self, other):
+        return self.id == other.id
+
+    def __hash__(self):
+        return hash((self.id))
+
 
 def array_to_task(array: List[str]) -> WdcTask:
     return WdcTask(
@@ -29,7 +35,8 @@ def array_to_task(array: List[str]) -> WdcTask:
         start=array[2],
         end=array[3],
         tags=array[4],
-        description=array[5]
+        description=array[5],
+        timestamp=array[6]
     )
 
 
@@ -76,14 +83,14 @@ def last_task(date: str) -> WdcTask:
         return array_to_task(row)
 
 
-def all_tasks(date: str) -> List[WdcTask]:
+def read_all_tasks(date: str) -> List[WdcTask]:
     if not is_date_valid(date):
         raise ValueError(f'{date} is not a valid date')
 
     file_path = task_file_path(date)
 
     if not file_path.exists():
-        raise FileNotFoundError(str(file_path))
+        return []
 
     with open(file_path, 'r') as file:
         return list(map(lambda x: array_to_task(x), list(csv.reader(file, delimiter=';'))))

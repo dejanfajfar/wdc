@@ -1,6 +1,9 @@
 import click
 
-from wdc.time import is_time_valid, is_date_valid, today
+import termtables as tt
+
+from wdc.helper.io import WdcTask
+from wdc.time import is_time_valid, is_date_valid, today, WdcTime
 from wdc.calculator import calc_workday_end
 from wdc.controller.work_day import start_work_task, list_tasks, end_last_task
 
@@ -19,6 +22,21 @@ def validate_date_callback(ctx, param, value):
         return value
     else:
         return today()
+
+
+def task_to_printout(task: WdcTask):
+    start = WdcTime(task.start)
+    if task.end != '':
+        end = WdcTime(task.end)
+
+    return [
+        task.id,
+        task.date,
+        f'{start.hours}:{start.minutes}',
+        f'{end.hours}:{end.minutes}' if task.end != '' else task.end,
+        task.tags,
+        (task.description[:10] + '..') if task.description != '' else task.description
+    ]
 
 
 @click.group()
@@ -115,11 +133,25 @@ def start(ctx, task_start, end, tag, message, date):
     callback=validate_date_callback,
     type=str,
     help='The date for which the tasks should be shown ')
-def list_all(ctx, date):
-    tasks = list_tasks(date)
+@click.option(
+    '-a',
+    '--all',
+    is_flag=True,
+    default=False,
+    help='Show duplicates of time entries'
+)
+def list_all(ctx, date, all):
+    tasks = list_tasks(date, all)
 
+    data = []
     for task in tasks:
-        print(task)
+        data.append(task_to_printout(task))
+
+    tt.print(
+        data,
+        header=['Id', 'Date', 'Start', 'End', 'Tags', 'Description'],
+        style=tt.styles.thin_thick
+    )
 
 
 @cli.command()

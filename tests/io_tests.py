@@ -21,7 +21,7 @@ class TaskToArrayFixture(unittest.TestCase):
 
 class ArrayToTaskFixture(unittest.TestCase):
     def test_valid(self):
-        test_array = ['test_id', '2020-10-25', '0800', '0900', 't1', 'description']
+        test_array = ['test_id', '2020-10-25', '0800', '0900', 't1', 'description', '11']
 
         result = array_to_task(test_array)
 
@@ -30,4 +30,51 @@ class ArrayToTaskFixture(unittest.TestCase):
         self.assertEqual('0800', result.start)
         self.assertEqual('0900', result.end)
         self.assertEqual('t1', result.tags)
-        self.assertEqual('description', result.description)
+        self.assertEqual('description', result.description),
+        self.assertEqual('11', result.timestamp)
+
+
+class WdcTaskFixture(unittest.TestCase):
+    def test_equality_valid(self):
+        test_object = WdcTask(
+            id='test_id',
+            date='2020-10-25',
+            start='0800',
+            end='0900',
+            tags='t1',
+            description='description',
+            timestamp='11'
+        )
+        test_object2 = WdcTask(
+            id='test_id',
+            date='2020-10-25',
+            start='0800',
+            end='0900',
+            tags='t1',
+            description='description',
+            timestamp='11'
+        )
+
+        self.assertTrue(test_object == test_object2)
+
+    def test_equality_different_id_invalid(self):
+        test_object = WdcTask(
+            id='test_id1',
+            date='2020-10-25',
+            start='0800',
+            end='0900',
+            tags='t1',
+            description='description',
+            timestamp='11'
+        )
+        test_object2 = WdcTask(
+            id='test_id2',
+            date='2020-10-25',
+            start='0800',
+            end='0900',
+            tags='t1',
+            description='description',
+            timestamp='11'
+        )
+
+        self.assertFalse(test_object == test_object2)
