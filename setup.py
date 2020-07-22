@@ -12,6 +12,11 @@ env_version = os.environ.get('WDC_VERSION')
 if env_version is not None and env_version != '':
     version = env_version
 
+# Read readme file
+this_directory = os.path.abspath(os.path.dirname(__file__))
+with open(os.path.join(this_directory, 'README.md'), encoding='utf-8') as f:
+    long_description = f.read()
+
 
 class BinaryDistribution(Distribution):
     def is_pure(self):
@@ -29,6 +34,7 @@ setup(
     entry_points={
         'console_scripts': ['wdc = wdc.runner:cli']
     },
+    long_description=long_description,
 
     author='Dejan Fajfar',
     author_email='dejan@fajfar.com',
