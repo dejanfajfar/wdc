@@ -35,7 +35,8 @@ def array_to_task(array: List[str]) -> WdcTask:
         start=array[2],
         end=array[3],
         tags=array[4],
-        description=array[5]
+        description=array[5],
+        timestamp=array[6]
     )
 
 
@@ -89,7 +90,7 @@ def read_all_tasks(date: str) -> List[WdcTask]:
     file_path = task_file_path(date)
 
     if not file_path.exists():
-        raise FileNotFoundError(str(file_path))
+        return []
 
     with open(file_path, 'r') as file:
         return list(map(lambda x: array_to_task(x), list(csv.reader(file, delimiter=';'))))

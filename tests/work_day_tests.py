@@ -187,7 +187,7 @@ class ListWorkTasksFixture(unittest.TestCase):
         self.assertEqual('1000', results[0].end)
 
     @patch('wdc.controller.work_day.read_all_tasks')
-    def test_filter_duplicate_tasks_still_solrted(self, mock_reader):
+    def test_duplicates_on_beginning(self, mock_reader):
         mock_reader.return_value = [
             WdcTask(
                 id='task',
@@ -221,8 +221,47 @@ class ListWorkTasksFixture(unittest.TestCase):
         results = list_tasks('2020-10-25', False)
 
         self.assertEqual(2, len(results))
-        self.assertEqual('1000', results[0].end)
         self.assertEqual('task', results[0].id)
+        self.assertEqual('1000', results[0].end)
         self.assertEqual('22', results[0].timestamp)
         self.assertEqual('task2', results[1].id)
         self.assertEqual('33', results[1].timestamp)
+
+    @patch('wdc.controller.work_day.read_all_tasks')
+    def test_duplicates_on_end(self, mock_reader):
+        mock_reader.return_value = [
+            WdcTask(
+                id='a2254a3',
+                date='2020-10-25',
+                start='0930',
+                end='',
+                tags='home',
+                description='',
+                timestamp='1595423306302'
+            ),
+            WdcTask(
+                id='c411c941',
+                date='2020-10-25',
+                start='1045',
+                end='',
+                tags='home',
+                description='',
+                timestamp='1595423428554'
+            ),
+            WdcTask(
+                id='c411c941',
+                date='2020-10-25',
+                start='1045',
+                end='1730',
+                tags='home',
+                description='',
+                timestamp='1595430367883'
+            ),
+        ]
+
+        results = list_tasks('2020-10-25', False)
+
+        self.assertEqual(2, len(results))
+        self.assertEqual('a2254a3', results[0].id)
+        self.assertEqual('c411c941', results[1].id)
+        self.assertEqual('1730', results[1].end)

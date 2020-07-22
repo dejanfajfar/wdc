@@ -55,17 +55,17 @@ def list_tasks(date: str, show_all: bool) -> List[WdcTask]:
     tasks = list(filter(lambda t: t.date == date, tasks))
 
     if show_all:
-        tasks.sort(key=lambda t: int(t.timestamp))
-        return tasks
+        return sorted(tasks, key=lambda t: int(t.timestamp))
 
     else:
-        tasks.sort(key=lambda t: int(t.timestamp), reverse=True)
-        return_tasks = []
+        return_tasks = {}
         for task in tasks:
-            if task in return_tasks:
-                continue
+            if task.id not in return_tasks:
+                return_tasks[task.id] = task
             else:
-                return_tasks.append(task)
+                if int(return_tasks[task.id].timestamp) < int(task.timestamp):
+                    return_tasks[task.id] = task
+                else:
+                    continue
 
-        return_tasks.sort(key=lambda t: int(t.timestamp))
-        return return_tasks
+        return sorted(list(return_tasks.values()), key=lambda t: int(t.timestamp))

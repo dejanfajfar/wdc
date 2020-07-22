@@ -72,15 +72,16 @@ class StartWorkTaskFixture(unittest.TestCase):
         self.assertEqual('description', call_args[3])
         self.assertEqual('2020-10-25', call_args[4])
 
-    # def test_go(self):
-        # self.cli_runner.invoke(cli, ['start', '0800', '--tag', 't1', '--tag', 't2', '--end',
-        #                             '0900', '--message', 'description'])
+    @unittest.skip('Experimentation integration test')
+    def test_go(self):
+        self.cli_runner.invoke(cli, ['start', '0800', '--tag', 't1', '--tag', 't2', '--end',
+                                    '0900', '--message', 'description'])
 
-        # result = self.cli_runner.invoke(cli, ['list'])
-        # print(result.output)
+        result = self.cli_runner.invoke(cli, ['list'])
+        print(result.output)
 
-        # result = self.cli_runner.invoke(cli, ['--help'])
-        # print(result.output)
+        result = self.cli_runner.invoke(cli, ['--help'])
+        print(result.output)
 
     @freeze_time('2020-07-25')
     @patch('wdc.runner.start_work_task')
