@@ -1,10 +1,9 @@
-name: OnPull-Release
+name: Release-Master
 
 on:
-  pull_request:
+  push:
     branches:
       - master
-      - development
 
 jobs:
 
@@ -73,7 +72,6 @@ jobs:
           path: dist/
 
   release-github:
-    if: github.ref == 'refs/heads/master'
     needs: [build]
     runs-on: ubuntu-latest
     steps:
