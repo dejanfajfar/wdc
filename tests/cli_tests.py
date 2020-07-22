@@ -143,6 +143,7 @@ class ListWorkTasksFixture(unittest.TestCase):
 
         self.assertIn('│ test_id │ 2020-10-25 │ 08:00 │     │      │             │', result.output)
 
+
 class HelperFunctionsFixture(unittest.TestCase):
     def test_ttask_to_printout_valid(self):
         test_object = WdcTask(
