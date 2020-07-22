@@ -35,7 +35,7 @@ setup(
         'console_scripts': ['wdc = wdc.runner:cli']
     },
     long_description=long_description,
-long_description_content_type='text/markdown',
+    long_description_content_type='text/markdown',
 
     author='Dejan Fajfar',
     author_email='dejan@fajfar.com',
