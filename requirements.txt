@@ -12,5 +12,6 @@ pylint==2.5.3
 python-dateutil==2.8.1
 rope==0.17.0
 six==1.15.0
+termtables==0.2.2
 toml==0.10.1
 wrapt==1.12.1
