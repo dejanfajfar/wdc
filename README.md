@@ -255,3 +255,17 @@ Provide optional date for which tasks should be listed
 Flag to denote if all tasks should be shown, or not
 
 > If set then the change history of each task will be returned
+
+### Examples
+
+List all tasks for today, even the internally duplicated ones
+
+```bash
+$ wdc list -a
+```
+
+List tasks for a given day
+
+```bash
+$ wdc list -d 2020-10-25
+```
