@@ -14,7 +14,11 @@ Born out of a nuisance that I could never tell when the working day was actually
 
 # Description
 
-TBD
+Trying to come up with something better than: "timetracking in the CLI"
+
+# Changelog
+
+The changelog can be found [here](CHANGELOG.md)
 
 # Installation
 
@@ -94,7 +98,7 @@ The time at which the work day started in the **hhmm** format
 
 #### -b, --break_duration
 
-The duration of the lunch break in minutes. 
+The duration of the lunch break in minutes.
 
 Default value is **30** minutes.
 
@@ -120,7 +124,7 @@ The duration of the workday in **hhmm** format
 
 Default value is **0745**.
 
-##### Examples
+### Examples
 
 An 8 hour workday starting at 8:00
 
@@ -164,7 +168,7 @@ Provide an optional end time for the task in **hhmm** format
 
 Provide the date to which this task should be associated to.
 
-##### Examples
+### Examples
 
 Start an anonymous task
 
@@ -183,3 +187,71 @@ Start a task for a date other than today
 ```bash
 wdc start 0800 -d 2020-01-01
 ```
+
+## end
+
+Adds a end time to the last work task of the given day
+
+> If no date is provided the today is takes as a default
+
+**sample**
+
+```bash
+$ wdc end
+```
+
+### Arguments
+
+No arguments supported by the command
+
+### Options
+
+#### -d, --date
+
+Provide the optional date on which the last task should be closed
+
+#### -e, --end
+
+Provide an optional end time for the task in **hhmm** format
+
+> If not provided then the current time is taken
+
+### Examples
+
+End current working day with by providing an end time
+
+```bash
+$ wdc end -e 1630
+```
+
+End last task from another day
+
+```bash
+$ wdc end -d 2020-10-25
+```
+
+## list
+
+List all stored work tasks for the day
+
+**sample**
+
+```bash
+$ wdc list
+```
+
+### Arguments
+
+No arguments supported by the command
+
+### Options
+
+#### -d, --date
+
+Provide optional date for which tasks should be listed
+
+#### -a, --all
+
+Flag to denote if all tasks should be shown, or not
+
+> If set then the change history of each task will be returned
