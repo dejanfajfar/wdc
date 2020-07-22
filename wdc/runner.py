@@ -26,14 +26,16 @@ def validate_date_callback(ctx, param, value):
 
 def task_to_printout(task: WdcTask):
     start = WdcTime(task.start)
-    end = WdcTime(task.end)
+    if task.end != '':
+        end = WdcTime(task.end)
+
     return [
         task.id,
         task.date,
         f'{start.hours}:{start.minutes}',
-        f'{end.hours}:{end.minutes}',
+        f'{end.hours}:{end.minutes}' if task.end != '' else task.end,
         task.tags,
-        task.description[:10] + '..'
+        (task.description[:10] + '..') if task.description != '' else task.description
     ]
 
 

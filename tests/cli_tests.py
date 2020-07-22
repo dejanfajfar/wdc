@@ -125,6 +125,23 @@ class ListWorkTasksFixture(unittest.TestCase):
 
         self.assertIn('│ test_id │ 2020-10-25 │ 08:00 │ 09:00 │ t1   │ test_descr.. │', result.output)
 
+    @patch('wdc.runner.list_tasks')
+    def test_minimal_task_valid(self, mock_controller):
+        mock_controller.return_value = [
+            WdcTask(
+                id='test_id',
+                date='2020-10-25',
+                start='0800',
+                end='',
+                tags='',
+                description='',
+                timestamp='11'
+            )
+        ]
+
+        result = self.cli_runner.invoke(cli, ['list'])
+
+        self.assertIn('│ test_id │ 2020-10-25 │ 08:00 │     │      │             │', result.output)
 
 class HelperFunctionsFixture(unittest.TestCase):
     def test_ttask_to_printout_valid(self):
