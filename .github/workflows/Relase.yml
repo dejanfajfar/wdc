@@ -133,3 +133,27 @@ jobs:
           asset_path: ./artifacts/wdc-${{ steps.version.outputs.content }}.${{ github.run_number }}-py3-none-any.whl
           asset_name: wdc-${{ steps.version.outputs.content }}.${{ github.run_number }}-py3-none-any.whl
           asset_content_type: application/octet-stream
+
+  release-pypi:
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Download a Build Artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: wdc
+          path: dist
+
+      - name: Read file
+        id: version
+        uses: juliangruber/read-file-action@v1.0.0
+        with:
+          path: version
+
+      - name: Publish a Python distribution to PyPI
+        uses: pypa/gh-action-pypi-publish@master
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_TOKEN }}
