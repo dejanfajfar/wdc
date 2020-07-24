@@ -1,8 +1,32 @@
-from wdc.helper.io import WdcTask, read_all_tasks, last_task, write_task
+from wdc.helper.io import WdcTask, read_all_tasks, last_task, write_task, find_tasks
 from wdc.helper.hash import generate_hash
 from wdc.time import WdcTime, today, is_date_valid, is_time_valid
 
 from typing import List
+
+
+class WdcTaskInfo(object):
+    def __init__(self, tasks: List[WdcTask]):
+        self._raw_tasks = tasks
+        self._raw_tasks.sort(key=lambda t: int(t.timestamp), reverse=True)
+
+    @property
+    def current(self) -> WdcTask:
+        if len(self._raw_tasks) > 0:
+            return self._raw_tasks[0]
+        else:
+            return None
+
+    @property
+    def is_valid(self):
+        return True
+
+    @property
+    def history(self) -> List[WdcTask]:
+        if len(self._raw_tasks) > 1:
+            return self._raw_tasks[1:]
+        else:
+            return []
 
 
 def start_work_task(start_time: str, end_time: str, tags, description: str, date: str):
@@ -69,3 +93,14 @@ def list_tasks(date: str, show_all: bool) -> List[WdcTask]:
                     continue
 
         return sorted(list(return_tasks.values()), key=lambda t: int(t.timestamp))
+
+
+def get_task_info(task_id: str) -> WdcTaskInfo:
+    if task_id == '':
+        return None
+    tasks = find_tasks(task_id)
+
+    if not tasks:
+        return None
+
+    return WdcTaskInfo(tasks)

@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch
 from freezegun import freeze_time
-from wdc.controller.work_day import start_work_task, list_tasks
+from wdc.controller.work_day import start_work_task, list_tasks, WdcTaskInfo, get_task_info
 from wdc.helper.io import WdcTask
 
 
@@ -256,7 +256,7 @@ class ListWorkTasksFixture(unittest.TestCase):
                 tags='home',
                 description='',
                 timestamp='1595430367883'
-            ),
+            )
         ]
 
         results = list_tasks('2020-10-25', False)
@@ -265,3 +265,55 @@ class ListWorkTasksFixture(unittest.TestCase):
         self.assertEqual('a2254a3', results[0].id)
         self.assertEqual('c411c941', results[1].id)
         self.assertEqual('1730', results[1].end)
+
+
+class FindTaskFixture(unittest.TestCase):
+
+    def test_invalid_task_id(self):
+        self.assertIsNone(get_task_info(''))
+
+    @patch('wdc.controller.work_day.find_tasks')
+    def test_no_tasks_found(self, mock_reader):
+        mock_reader.return_value = []
+
+        self.assertIsNone(get_task_info(''))
+
+
+class WdcTaskInfoFixture(unittest.TestCase):
+    def setUp(self) -> None:
+        self._valid_task_info = WdcTaskInfo(
+            [
+                WdcTask(
+                    id='c411c941',
+                    date='2020-10-25',
+                    start='0930',
+                    end='',
+                    tags='home',
+                    description='',
+                    timestamp='1595423306302'
+                ),
+                WdcTask(
+                    id='c411c941',
+                    date='2020-10-25',
+                    start='0930',
+                    end='1000',
+                    tags='home',
+                    description='',
+                    timestamp='1595423428554'
+                ),
+                WdcTask(
+                    id='c411c941',
+                    date='2020-10-25',
+                    start='1045',
+                    end='1730',
+                    tags='home',
+                    description='',
+                    timestamp='1595430367883'
+                )
+            ]
+        )
+
+    def test_current_is_correct(self):
+        current = self._valid_task_info.current
+
+        self.assertEqual('1595430367883', current.timestamp)

@@ -1,8 +1,9 @@
 # WDC
 
-***Work day calculator***
+***Command line work day helper and logger***
 
 ![CI](https://github.com/dejanfajfar/wdc/workflows/CI/badge.svg)
+[![PyPI version](https://badge.fury.io/py/wdc.svg)](https://badge.fury.io/py/wdc)
 
 ![Logo](doc/logo/cover.png)
 
