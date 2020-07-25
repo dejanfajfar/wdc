@@ -251,6 +251,4 @@ class InfoCommandFixture(unittest.TestCase):
 
         result = self.cli_runner.invoke(cli, ['info', 'testId'])
 
-        print(result.output)
-
         self.assertIn('Task with id testId not found.', result.output)

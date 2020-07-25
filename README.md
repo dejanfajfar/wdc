@@ -270,3 +270,27 @@ List tasks for a given day
 ```bash
 $ wdc list -d 2020-10-25
 ```
+
+## info
+
+Provides detailed information about the given task
+
+***sample***
+
+```bash
+$ wdc info 0c3a9014
+```
+
+### Arguments
+
+The **id** of the task already recorded
+
+> The task ID can be retrived with the list command
+
+### Options
+
+The command does not support any options at this point
+
+### Examples
+
+The only use case is shown in the sample.
