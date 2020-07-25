@@ -47,6 +47,11 @@ dist: clean
 	python setup.py bdist_wheel
 
 #
+# Create only the wheel file fo pypi upload purposes
+whl: clean
+	python setup.py bdist_wheel
+
+#
 # Removed all generated directories
 clean:
 	rm -rf dist
