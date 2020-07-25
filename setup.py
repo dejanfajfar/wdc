@@ -34,6 +34,7 @@ setup(
     entry_points={
         'console_scripts': ['wdc = wdc.runner:cli']
     },
+    description='Command line work day helper and logger',
     long_description=long_description,
     long_description_content_type='text/markdown',
 
@@ -45,7 +46,8 @@ setup(
     distclass=BinaryDistribution,
     install_requires=[
         'click',
-        'termtables'
+        'termtables',
+        'colored'
     ],
 
     classifiers=[

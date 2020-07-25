@@ -1,11 +1,15 @@
+import os
+from typing import List
+
 import click
 
 import termtables as tt
+from colored import fg, bg, attr
 
 from wdc.helper.io import WdcTask
 from wdc.time import is_time_valid, is_date_valid, today, WdcTime
 from wdc.calculator import calc_workday_end
-from wdc.controller.work_day import start_work_task, list_tasks, end_last_task
+from wdc.controller.work_day import start_work_task, list_tasks, end_last_task, WdcTaskInfo, get_task_info
 
 
 def validate_time_callback(ctx, param, value):
@@ -24,7 +28,7 @@ def validate_date_callback(ctx, param, value):
         return today()
 
 
-def task_to_printout(task: WdcTask):
+def task_to_printout(task: WdcTask) -> List[str]:
     start = WdcTime(task.start)
     if task.end != '':
         end = WdcTime(task.end)
@@ -37,6 +41,40 @@ def task_to_printout(task: WdcTask):
         task.tags,
         (task.description[:10] + '..') if task.description != '' else task.description
     ]
+
+
+def task_to_history_print(task: WdcTask) -> List[str]:
+    temp_list = task_to_printout(task)
+    temp_list.pop(0)
+    temp_list[4] = task.description
+
+    temp_list.insert(0, task.timestamp)
+
+    return temp_list
+
+
+def print_task_info(task_info: WdcTaskInfo):
+    def print_section_header(text): return print(
+        f'{os.linesep}{fg(0)}{bg(111)}{attr(1)}:: {text} {attr(0)}{os.linesep}')
+
+    def print_task_attribute(attribute, value): return print(f'{attribute} :\t{value}')
+
+    print_section_header('Current')
+    current = task_info.current
+    print_task_attribute('id         ', current.id)
+    print_task_attribute('description', current.description)
+    print_task_attribute('timestamp  ', current.timestamp)
+    print_task_attribute('start      ', current.start)
+    print_task_attribute('end        ', current.end)
+    print_task_attribute('tags       ', current.tags)
+
+    print_section_header('History')
+
+    tt.print(
+        list(map(lambda i: task_to_history_print(i), task_info.history)),
+        header=['Timestamp', 'Date', 'Start', 'End', 'Tags', 'Description'],
+        style=tt.styles.rounded_double
+    )
 
 
 @click.group()
@@ -172,6 +210,20 @@ def list_all(ctx, date, all):
     help='The time at which the work task was finished')
 def end(ctx, date, end):
     end_last_task(date, end)
+
+
+@cli.command()
+@click.pass_context
+@click.argument(
+    'task_id',
+    type=str)
+def info(ctx, task_id):
+    task_info = get_task_info(task_id)
+
+    if task_info:
+        print_task_info(task_info)
+    else:
+        print(f'Task with id {task_id} not found.')
 
 
 if __name__ == '__main__':
