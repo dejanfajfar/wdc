@@ -14,6 +14,7 @@ class CalcCommandFixture(unittest.TestCase):
 
     def test_valid_no_options(self):
         result = self.cli_runner.invoke(cli, ['calc', '0800'])
+        self.assertEqual(0, result.exit_code)
         self.assertIn('1615', result.output)
 
     def test_valid_given_break(self):
@@ -34,7 +35,8 @@ class CalcCommandFixture(unittest.TestCase):
 
     def test_invalid_start_time_no_options(self):
         result = self.cli_runner.invoke(cli, ['calc', '0860'])
-        self.assertIn('Start of the workday time 0860 is an impossible time', result.output)
+        self.assertEqual(2, result.exit_code)
+        self.assertIn('Error: Invalid value for \'WORKDAY_START\': 0860 is not a valid time', result.output)
 
     def test_invalid_workday_duration(self):
         result = self.cli_runner.invoke(cli, ['calc', '0800', '-d', '0860'])
@@ -145,6 +147,14 @@ class ListWorkTasksFixture(unittest.TestCase):
 
         self.assertIn('│ test_id │ 2020-10-25 │ 08:00 │     │      │             │', result.output)
 
+    @patch('wdc.runner.list_tasks')
+    def test_no_tasks_found(self, mock_controller):
+        mock_controller.return_value = []
+
+        result = self.cli_runner.invoke(cli, ['list'])
+
+        self.assertIn('No tasks found', result.output)
+
 
 class HelperFunctionsFixture(unittest.TestCase):
     def test_ttask_to_printout_valid(self):
@@ -241,8 +251,8 @@ class InfoCommandFixture(unittest.TestCase):
         self.assertIn('start       :	0800', result.output)
         self.assertIn('tags        :	t1', result.output)
 
-        # If there is no history then the table is not displayed. C
-        # heck that the table header is not present in the output
+        # If there is no history then the table is not displayed.
+        # Check that the table header is not present in the output
         self.assertNotIn('│ Timestamp │ Date       │ Start │ End   │ Tags   │ Description     │', result.output)
 
     @patch('wdc.runner.get_task_info')
@@ -252,3 +262,8 @@ class InfoCommandFixture(unittest.TestCase):
         result = self.cli_runner.invoke(cli, ['info', 'testId'])
 
         self.assertIn('Task with id testId not found.', result.output)
+
+    def test_invalid_taskid(self):
+        result = self.cli_runner.invoke(cli, ['info', ''])
+
+        self.assertEqual(2, result.exit_code)
