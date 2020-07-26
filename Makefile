@@ -61,4 +61,4 @@ clean:
 #
 # Starts a docker image with the latest build version of wdc and drops you into the cli in that docker image
 playground: dist
-	sudo docker run -it -v $(shell pwd):/wdccode python bash -c "pip install /wdccode/dist/wdc-0.1-py3-none-any.whl & bash"
+	sudo docker run -it -v $(shell pwd):/wdccode python bash -c "pip install /wdccode/dist/*.whl & bash"
