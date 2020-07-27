@@ -1,6 +1,6 @@
 import unittest
 
-from wdc.helper.io import task_to_array, WdcTask, array_to_task
+from wdc.helper.io import task_to_array, WdcTask, array_to_task, array_to_tags_string
 
 
 class TaskToArrayFixture(unittest.TestCase):
@@ -78,3 +78,19 @@ class WdcTaskFixture(unittest.TestCase):
         )
 
         self.assertFalse(test_object == test_object2)
+
+class ArrayToTagsString(unittest.TestCase):
+
+    def test_valid(self):
+        tags_list = ['tag1', 'a', 'b']
+
+        test_result = array_to_tags_string(tags_list)
+
+        self.assertEqual('a,b,tag1', test_result)
+
+    def test_empty_list(self):
+        tags_list = []
+
+        test_result = array_to_tags_string(tags_list)
+
+        self.assertEqual('', test_result)
