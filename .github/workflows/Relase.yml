@@ -72,9 +72,9 @@ jobs:
           path: dist/
 
       - name: Create whl package
-          run: make whl
-          env:
-            WDC_VERSION: ${{ steps.version.outputs.content }}.${{ github.run_number }}
+        run: make whl
+        env:
+          WDC_VERSION: ${{ steps.version.outputs.content }}.${{ github.run_number }}
 
       - name: Upload whl artifacts
         uses: actions/upload-artifact@v2
