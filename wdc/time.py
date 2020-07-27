@@ -93,5 +93,23 @@ class WdcTime(object):
             self.add_hours((self_minutes + minutes) // 60)
         return self
 
+    def __hash__(self):
+        return int(self.hours) + int(self.minutes)
+
     def __str__(self):
         return self.__rawTime
+
+    def __eq__(self, other):
+        return hash(self) == hash(other)
+
+    def __lt__(self, other):
+        return hash(self) < hash(other)
+
+    def __gt__(self, other):
+        return hash(self) > hash(other)
+
+    def __le__(self, other):
+        return hash(self) <= hash(other)
+
+    def __ge__(self, other):
+        return hash(self) >= hash(other)

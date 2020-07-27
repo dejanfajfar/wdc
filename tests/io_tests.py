@@ -79,6 +79,7 @@ class WdcTaskFixture(unittest.TestCase):
 
         self.assertFalse(test_object == test_object2)
 
+
 class ArrayToTagsString(unittest.TestCase):
 
     def test_valid(self):

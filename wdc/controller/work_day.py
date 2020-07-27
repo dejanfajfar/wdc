@@ -1,4 +1,4 @@
-from wdc.helper.io import WdcTask, read_all_tasks, last_task, write_task, find_tasks
+from wdc.helper.io import WdcTask, read_all_tasks, last_task, write_task, find_tasks, array_to_tags_string
 from wdc.helper.hash import generate_hash
 from wdc.time import WdcTime, today, is_date_valid, is_time_valid, timestamp
 
@@ -29,7 +29,11 @@ class WdcTaskInfo(object):
             return []
 
 
-def start_work_task(start_time: str, end_time: str, tags, description: str, date: str):
+def sort_by_time(tasks: List[WdcTask], descending: bool = False) -> List[WdcTask]:
+    return sorted(tasks, key=lambda t: hash(WdcTime(t.start)), reverse=descending)
+
+
+def start_work_task(start_time: str, end_time: str, tags: List[str], description: str, date: str):
     start = WdcTime(start_time)
     end = WdcTime(end_time) if end_time else None
 
@@ -46,7 +50,7 @@ def start_work_task(start_time: str, end_time: str, tags, description: str, date
         date=date,
         start=str(start),
         end=str(end) if end is not None else '',
-        tags=','.join(map(str, tags)),
+        tags=array_to_tags_string(tags),
         description=description
     )
 
@@ -93,7 +97,7 @@ def list_tasks(date: str, show_all: bool) -> List[WdcTask]:
                 else:
                     continue
 
-        return sorted(list(return_tasks.values()), key=lambda t: int(t.timestamp))
+        return sort_by_time(return_tasks.values())
 
 
 def get_task_info(task_id: str) -> WdcTaskInfo:
@@ -105,3 +109,30 @@ def get_task_info(task_id: str) -> WdcTaskInfo:
         return None
 
     return WdcTaskInfo(tasks)
+
+
+def amend_task(task_id: str, tags: List[str] = [], start: str = '', end: str = '', message: str = '', date: str = ''):
+    if start != '' and not is_time_valid(start):
+        raise ValueError(f'The start time {start} is not a valid time')
+
+    if end != '' and not is_time_valid(end):
+        raise ValueError(f'The end time {end} is not a valid time')
+
+    if date != '' and not is_time_valid(date):
+        raise ValueError(f'The given date {date} is not valid')
+
+    task_info = get_task_info(task_id)
+
+    if task_info is None:
+        raise ValueError(f'The given task id {task_id} did not resolve to a task')
+
+    task = task_info.current
+
+    task.timestamp = timestamp()
+    task.tags = array_to_tags_string(tags) if tags else task.tags
+    task.start = start if is_time_valid(start) else task.start
+    task.end = end if is_time_valid(end) else task.end
+    task.description = message if message else task.description
+    task.date = date if is_date_valid(date) else task.date
+
+    write_task(task)
