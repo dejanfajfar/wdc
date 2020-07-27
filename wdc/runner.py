@@ -11,11 +11,13 @@ from wdc.time import is_time_valid, is_date_valid, today, WdcTime
 from wdc.calculator import calc_workday_end
 from wdc.controller.work_day import start_work_task, list_tasks, end_last_task, WdcTaskInfo, get_task_info
 
+
 def validate_break_duration_callback(ctx, param, value):
     if value < 0:
         raise click.BadParameter(f'Provided break duration of {value} is not a valid break duration')
     else:
         return value
+
 
 def validate_time_callback(ctx, param, value):
     if not param.required and value == '':
@@ -31,6 +33,7 @@ def validate_date_callback(ctx, param, value):
         return value
     else:
         return today()
+
 
 def validate_taskid_callback(ctx, param, value):
     if not param.required and value == '':
@@ -65,17 +68,20 @@ def task_to_history_print(task: WdcTask) -> List[str]:
 
     return temp_list
 
+
 def print_warning(text):
     if not text:
         return
 
     print(f'{os.linesep}{fg(0)}{bg(214)}\u26a0 {text} {attr(0)}{os.linesep}')
 
+
 def print_error(text):
     if not text:
         return
 
     print(f'{os.linesep}{fg(0)}{bg(202)}!! {text} {attr(0)}{os.linesep}')
+
 
 def print_task_info(task_info: WdcTaskInfo):
     def print_section_header(text): return print(
