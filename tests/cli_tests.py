@@ -300,10 +300,10 @@ class AmendTaskFixture(unittest.TestCase):
         self.assertEqual('', mock_controller.call_args.kwargs['message'])
         self.assertEqual('', mock_controller.call_args.kwargs['date'])
 
-    @patch('wdc.runner.get_task_info')
-    def test_invalid_task_id(self, mock_controller):
-        mock_controller.return_value = None
+    @patch('wdc.runner.amend_task')
+    def test_handle_valueError(self, mock_controller):
+        mock_controller.side_effect = ValueError('')
 
-        result = self.cli_runner.invoke(cli, ['amend', 'id1'])
+        result = self.cli_runner.invoke(cli, ['amend', 'id'])
 
-        print(result.exit_code)
+        self.assertIn('!!', result.output)

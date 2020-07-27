@@ -78,6 +78,14 @@ The table below should provide some additional information and clarification on 
 
 The minutes work as _expected_.
 
+# Date format
+
+**wdc** uses the standard _ISO8601_ date format (```YYYY-MM-DD```).
+
+***sample***
+
+2020-10-25 -> 25th october 2020
+
 # Commands
 
 ## calc
@@ -285,7 +293,7 @@ $ wdc info 0c3a9014
 
 The **id** of the task already recorded
 
-> The task ID can be retrived with the list command
+> The task ID can be retrieved with the list command
 
 ### Options
 
@@ -294,3 +302,61 @@ The command does not support any options at this point
 ### Examples
 
 The only use case is shown in the sample.
+
+## amend
+
+Enables you to change an existing workday task
+
+> The original task is not changes only a new revision added
+
+***sample***
+
+```bash
+$ wdc amend 0c3a9014 -t my_tag
+```
+
+### Arguments
+
+The **id** of the task to be altered
+
+> The task ID can be retrieved with the list command
+
+### Options
+
+#### -s / --start
+
+The new value of the task start time
+
+#### -t /--tag
+
+The new tags to be associated with the task
+
+Multiple tags can be provided, if so then each has to be provided with its own ```-t``` or ```--tag``` option.
+
+> Note that the new tags will override the old one, They will **NOT** be appended to the existing ones
+
+#### -m / --message
+
+The new message for the work task
+
+#### -e / --end
+
+The new value of the task end time
+
+#### -d /--date
+
+The new date for the work task
+
+### Examples
+
+Apply multiple tags to the existing task
+
+```bash
+$ wdc amend 0c3a9014 -t tag1 -t tag2
+```
+
+Update the start time, end time and the message of the task
+
+```bash
+$ wdc amend 0c3a9014 -s 0900 -e 1030 -m "Updated message"
+```
