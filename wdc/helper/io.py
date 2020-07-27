@@ -31,6 +31,11 @@ class WdcTask(object):
         return hash((self.id))
 
 
+def array_to_tags_string(tags: List[str]) -> str:
+    tags.sort()
+    return ','.join(map(str, tags))
+
+
 def array_to_task(array: List[str]) -> WdcTask:
     return WdcTask(
         id=array[0],

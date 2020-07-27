@@ -1,1 +1,3 @@
-[ ] - Validate the break duration to not be negative
+- [x] Validate the break duration to not be negative
+- [x] Order tags by alphabet
+- [ ] Use rounded table for the list command output

@@ -57,7 +57,7 @@ class StartWorkTaskFixture(unittest.TestCase):
 
         self.assertEqual('0800', call_args[0])
         self.assertEqual('0900', call_args[1])
-        self.assertEqual(('t1', 't2'), call_args[2])
+        self.assertEqual(['t1', 't2'], call_args[2])
         self.assertEqual('description', call_args[3])
         self.assertEqual('2020-10-25', call_args[4])
 
@@ -71,7 +71,7 @@ class StartWorkTaskFixture(unittest.TestCase):
 
         self.assertEqual('0800', call_args[0])
         self.assertEqual('0900', call_args[1])
-        self.assertEqual(('t1', 't2'), call_args[2])
+        self.assertEqual(['t1', 't2'], call_args[2])
         self.assertEqual('description', call_args[3])
         self.assertEqual('2020-10-25', call_args[4])
 
@@ -96,7 +96,7 @@ class StartWorkTaskFixture(unittest.TestCase):
 
         self.assertEqual('0800', call_args[0])
         self.assertEqual('', call_args[1])
-        self.assertEqual((), call_args[2])
+        self.assertEqual([], call_args[2])
         self.assertEqual('', call_args[3])
         self.assertEqual('2020-07-25', call_args[4])
 
@@ -267,3 +267,43 @@ class InfoCommandFixture(unittest.TestCase):
         result = self.cli_runner.invoke(cli, ['info', ''])
 
         self.assertEqual(2, result.exit_code)
+
+
+class AmendTaskFixture(unittest.TestCase):
+    def setUp(self):
+        self.cli_runner = CliRunner()
+
+    @patch('wdc.runner.amend_task')
+    def test_all_parameters_given(self, mock_controller):
+        self.cli_runner.invoke(cli, ['amend', 'id1', '-s', '0800', '-e',
+                                              '0900', '-t', 't1', '-m', 'test message', '-d', '2020-10-25'])
+
+        mock_controller.assert_called()
+
+        self.assertEqual('id1', mock_controller.call_args.args[0])
+        self.assertEqual('0800', mock_controller.call_args.kwargs['start'])
+        self.assertEqual('0900', mock_controller.call_args.kwargs['end'])
+        self.assertEqual(['t1'], mock_controller.call_args.kwargs['tags'])
+        self.assertEqual('test message', mock_controller.call_args.kwargs['message'])
+        self.assertEqual('2020-10-25', mock_controller.call_args.kwargs['date'])
+
+    @patch('wdc.runner.amend_task')
+    def test_no_parameters_given(self, mock_controller):
+        self.cli_runner.invoke(cli, ['amend', 'id1'])
+
+        mock_controller.assert_called()
+
+        self.assertEqual('id1', mock_controller.call_args.args[0])
+        self.assertEqual('', mock_controller.call_args.kwargs['start'])
+        self.assertEqual('', mock_controller.call_args.kwargs['end'])
+        self.assertEqual([], mock_controller.call_args.kwargs['tags'])
+        self.assertEqual('', mock_controller.call_args.kwargs['message'])
+        self.assertEqual('', mock_controller.call_args.kwargs['date'])
+
+    @patch('wdc.runner.amend_task')
+    def test_handle_valueError(self, mock_controller):
+        mock_controller.side_effect = ValueError('')
+
+        result = self.cli_runner.invoke(cli, ['amend', 'id'])
+
+        self.assertIn('!!', result.output)

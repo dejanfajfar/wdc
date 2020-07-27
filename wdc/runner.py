@@ -9,7 +9,7 @@ from colored import fg, bg, attr
 from wdc.helper.io import WdcTask
 from wdc.time import is_time_valid, is_date_valid, today, WdcTime
 from wdc.calculator import calc_workday_end
-from wdc.controller.work_day import start_work_task, list_tasks, end_last_task, WdcTaskInfo, get_task_info
+from wdc.controller.work_day import start_work_task, list_tasks, end_last_task, WdcTaskInfo, get_task_info, amend_task
 
 
 def validate_break_duration_callback(ctx, param, value):
@@ -29,6 +29,8 @@ def validate_time_callback(ctx, param, value):
 
 
 def validate_date_callback(ctx, param, value):
+    if not param.required and value == '':
+        return value
     if is_date_valid(value):
         return value
     else:
@@ -180,6 +182,7 @@ def calc(ctx, workday_start, break_duration, workday_duration):
     '--date',
     default='',
     show_default=True,
+    required=True,
     callback=validate_date_callback,
     type=str,
     help='The date at which the task has happened')
@@ -188,7 +191,7 @@ def start(ctx, task_start, end, tag, message, date):
         print_error(f'Start time {task_start} of the task is an impossible time')
         ctx.exit()
 
-    start_work_task(task_start, end, tag, message, date)
+    start_work_task(task_start, end, list(tag), message, date)
 
 
 @cli.command('list')
@@ -257,6 +260,57 @@ def info(ctx, task_id):
         print_task_info(task_info)
     else:
         print(f'Task with id {task_id} not found.')
+
+
+@cli.command()
+@click.pass_context
+@click.argument(
+    'task_id',
+    type=str,
+    callback=validate_taskid_callback)
+@click.option(
+    '-s',
+    '--start',
+    default='',
+    show_default=True,
+    type=str,
+    callback=validate_time_callback,
+    help='The optional time at which the work task has started')
+@click.option(
+    '-t',
+    '--tag',
+    multiple=True,
+    default=[],
+    show_default=True,
+    help='Optional tags to be applied to the workday task')
+@click.option(
+    '-m',
+    '--message',
+    default='',
+    show_default=True,
+    type=str,
+    help='The optional message to be associated with the workday task')
+@click.option(
+    '-e',
+    '--end',
+    default='',
+    show_default=True,
+    type=str,
+    callback=validate_time_callback,
+    help='The optional time at which the work task was finished')
+@click.option(
+    '-d',
+    '--date',
+    default='',
+    show_default=True,
+    callback=validate_date_callback,
+    type=str,
+    help='The date at which the task has happened')
+def amend(ctx, task_id, start, end, tag, message, date):
+    try:
+        amend_task(task_id, tags=list(tag), start=start, end=end, message=message, date=date)
+    except ValueError as error:
+        print_error(error)
 
 
 if __name__ == '__main__':

@@ -83,6 +83,21 @@ class WdcTimeFixture(unittest.TestCase):
         test_object = WdcTime.now()
         self.assertEqual('0808', str(test_object))
 
+    def test_compare(self):
+        small_time = WdcTime('0800')
+        big_time = WdcTime('0900')
+
+        self.assertTrue(small_time < big_time)
+        self.assertFalse(small_time < small_time)
+        self.assertTrue(small_time <= small_time)
+        self.assertFalse(big_time < small_time)
+
+        self.assertTrue(big_time > small_time)
+        self.assertTrue(big_time >= small_time)
+
+        self.assertTrue(small_time == small_time)
+        self.assertFalse(small_time == big_time)
+
 
 class IsTimeValidFixture(unittest.TestCase):
     def test_valid(self):
