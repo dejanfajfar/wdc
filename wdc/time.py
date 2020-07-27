@@ -6,13 +6,13 @@ from time import time
 def is_time_valid(time: str) -> bool:
     if time is None:
         return False
-    return re.match(r"(([01][0-9])|(2[0-3]))[0-5][0-9]", time)
+    return re.match(r"(([01][0-9])|(2[0-3]))[0-5][0-9]", time) is not None
 
 
 def is_date_valid(date: str) -> bool:
     if date is None:
         return False
-    return re.match(r"(19|20)\d\d-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])", date)
+    return re.match(r"(19|20)\d\d-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])", date) is not None
 
 
 def today() -> str:
@@ -73,7 +73,7 @@ class WdcTime(object):
         time_hours = int(self.hours)
         new_hours = (time_hours + hours) % 24
 
-        # There is no hour 24 this is automaticall converted to 00
+        # There is no hour 24 this is automatically converted to 00
         if new_hours == "24":
             new_hours = "00"
         self.__rawTime = f"{new_hours:02d}{self.minutes}"
