@@ -12,6 +12,13 @@ from wdc.calculator import calc_workday_end
 from wdc.controller.work_day import start_work_task, list_tasks, end_last_task, WdcTaskInfo, get_task_info
 
 
+def validate_break_duration_callback(ctx, param, value):
+    if value < 0:
+        raise click.BadParameter(f'Provided break duration of {value} is not a valid break duration')
+    else:
+        return value
+
+
 def validate_time_callback(ctx, param, value):
     if not param.required and value == '':
         return value
@@ -26,6 +33,15 @@ def validate_date_callback(ctx, param, value):
         return value
     else:
         return today()
+
+
+def validate_taskid_callback(ctx, param, value):
+    if not param.required and value == '':
+        return value
+    if value != '':
+        return value
+    else:
+        raise click.BadParameter(f'{value} is not a valid task id')
 
 
 def task_to_printout(task: WdcTask) -> List[str]:
@@ -51,6 +67,20 @@ def task_to_history_print(task: WdcTask) -> List[str]:
     temp_list.insert(0, task.timestamp)
 
     return temp_list
+
+
+def print_warning(text):
+    if not text:
+        return
+
+    print(f'{os.linesep}{fg(0)}{bg(214)}\u26a0 {text} {attr(0)}{os.linesep}')
+
+
+def print_error(text):
+    if not text:
+        return
+
+    print(f'{os.linesep}{fg(0)}{bg(202)}!! {text} {attr(0)}{os.linesep}')
 
 
 def print_task_info(task_info: WdcTaskInfo):
@@ -91,14 +121,16 @@ def cli(ctx, debug):
 @click.pass_context
 @click.argument(
     'workday_start',
-    type=str)
+    type=str,
+    callback=validate_time_callback)
 @click.option(
     '-b',
     '--break_duration',
     default=30,
     show_default=True,
+    callback=validate_break_duration_callback,
     type=int,
-    help='The duration of the lunch break in minutes')
+    help='The optional duration of the lunch break in minutes, must be a positive number')
 @click.option(
     '-d',
     '--workday_duration',
@@ -107,12 +139,8 @@ def cli(ctx, debug):
     type=str,
     callback=validate_time_callback,
     required=True,
-    help='The duration of the standard workday given in military 24h time')
+    help='The optional duration of the standard workday given in hhmm format')
 def calc(ctx, workday_start, break_duration, workday_duration):
-    # Validate that the workday start is in a valid time
-    if not is_time_valid(workday_start):
-        print(f'Start of the workday time {workday_start} is an impossible time')
-        ctx.exit()
 
     wd_end = calc_workday_end(workday_start, break_duration, workday_duration)
 
@@ -131,14 +159,14 @@ def calc(ctx, workday_start, break_duration, workday_duration):
     multiple=True,
     default=[],
     show_default=True,
-    help='Tags to be applied to the wokday task')
+    help='Optional tags to be applied to the workday task')
 @click.option(
     '-m',
     '--message',
     default='',
     show_default=True,
     type=str,
-    help='A descriptive message associated with the task')
+    help='The optional message to be associated with the workday task')
 @click.option(
     '-e',
     '--end',
@@ -146,7 +174,7 @@ def calc(ctx, workday_start, break_duration, workday_duration):
     show_default=True,
     type=str,
     callback=validate_time_callback,
-    help='The time at which the work task was finished')
+    help='The optional time at which the work task was finished')
 @click.option(
     '-d',
     '--date',
@@ -157,7 +185,7 @@ def calc(ctx, workday_start, break_duration, workday_duration):
     help='The date at which the task has happened')
 def start(ctx, task_start, end, tag, message, date):
     if not is_time_valid(task_start):
-        print(f'Start time {task_start} of the task is an impossible time')
+        print_error(f'Start time {task_start} of the task is an impossible time')
         ctx.exit()
 
     start_work_task(task_start, end, tag, message, date)
@@ -181,12 +209,16 @@ def start(ctx, task_start, end, tag, message, date):
 def list_all(ctx, date, all):
     tasks = list_tasks(date, all)
 
-    data = []
+    tasks_to_print = []
     for task in tasks:
-        data.append(task_to_printout(task))
+        tasks_to_print.append(task_to_printout(task))
+
+    if not tasks:
+        print_warning('No tasks found')
+        ctx.exit()
 
     tt.print(
-        data,
+        tasks_to_print,
         header=['Id', 'Date', 'Start', 'End', 'Tags', 'Description'],
         style=tt.styles.thin_thick
     )
@@ -216,7 +248,8 @@ def end(ctx, date, end):
 @click.pass_context
 @click.argument(
     'task_id',
-    type=str)
+    type=str,
+    callback=validate_taskid_callback)
 def info(ctx, task_id):
     task_info = get_task_info(task_id)
 

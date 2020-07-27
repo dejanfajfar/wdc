@@ -1,6 +1,6 @@
 from wdc.helper.io import WdcTask, read_all_tasks, last_task, write_task, find_tasks
 from wdc.helper.hash import generate_hash
-from wdc.time import WdcTime, today, is_date_valid, is_time_valid
+from wdc.time import WdcTime, today, is_date_valid, is_time_valid, timestamp
 
 from typing import List
 
@@ -66,6 +66,7 @@ def end_last_task(date: str, time: str):
     task = last_task(date)
 
     task.end = time
+    task.timestamp = timestamp()
 
     write_task(task)
 

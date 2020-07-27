@@ -1,4 +1,4 @@
 [flake8]
-exclude = .venv, dist
+exclude = .venv, dist, build
 max-line-length = 120
 max-complexity = 10
