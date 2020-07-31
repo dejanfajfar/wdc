@@ -6,7 +6,8 @@ import click
 import termtables as tt
 from colored import fg, bg, attr
 
-from wdc.helper.io import WdcTask
+from wdc.classes import WdcTask
+from wdc.controller.export_import import export_tasks, ExportType
 from wdc.time import is_time_valid, is_date_valid, today, WdcTime
 from wdc.calculator import calc_workday_end
 from wdc.controller.work_day import start_work_task, list_tasks, end_last_task, WdcTaskInfo, get_task_info, amend_task
@@ -311,6 +312,40 @@ def amend(ctx, task_id, start, end, tag, message, date):
         amend_task(task_id, tags=list(tag), start=start, end=end, message=message, date=date)
     except ValueError as error:
         print_error(error)
+
+
+@cli.command()
+@click.pass_context
+@click.option(
+    '-d',
+    '--date',
+    default='',
+    show_default=True,
+    callback=validate_date_callback,
+    type=str,
+    help='The date for which the tasks should be exported')
+@click.option(
+    '-o',
+    '--output',
+    default='',
+    show_default=True,
+    type=str,
+    help='The file path to where the export should be written')
+@click.option(
+    '--csv',
+    default=False,
+    show_default=True,
+    type=bool,
+    is_flag=True,
+    help='Determines if the export should be formatted as csv')
+def export(ctx, date, output, csv):
+    selected_export_type = ExportType.JSON
+    if csv:
+        selected_export_type = ExportType.CSV
+
+    export_tasks(date=date,
+                 file_path=output,
+                 export_to=selected_export_type)
 
 
 if __name__ == '__main__':

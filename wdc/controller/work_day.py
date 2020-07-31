@@ -1,4 +1,5 @@
-from wdc.helper.io import WdcTask, read_all_tasks, last_task, write_task, find_tasks, array_to_tags_string
+from wdc.helper.io import read_all_tasks, last_task, write_task, find_tasks, array_to_tags_string
+from wdc.classes import WdcTask
 from wdc.helper.hash import generate_hash
 from wdc.time import WdcTime, today, is_date_valid, is_time_valid, timestamp
 

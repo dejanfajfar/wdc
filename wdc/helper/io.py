@@ -3,32 +3,12 @@ from os import listdir
 from os.path import isfile, join
 
 import wdc.settings as settings
-from wdc.time import is_date_valid, is_time_valid, to_date_no_day, timestamp as ts
+from wdc.classes import WdcTask, to_array, to_task
+from wdc.time import is_date_valid, to_date_no_day
 from pathlib import Path
-from dataclasses import dataclass
 from typing import List
 
 HOME_DIR_PATH = Path.joinpath(Path.home(), settings.HOME_DIR)
-
-
-@dataclass
-class WdcTask(object):
-    id: str
-    date: str
-    start: str
-    end: str
-    tags: str
-    description: str
-    timestamp: str = ts()
-
-    def is_valid(self) -> bool:
-        return is_date_valid(self.date) and is_time_valid(self.start) and is_time_valid(self.end)
-
-    def __eq__(self, other):
-        return self.id == other.id
-
-    def __hash__(self):
-        return hash((self.id))
 
 
 def array_to_tags_string(tags: List[str]) -> str:
@@ -36,45 +16,20 @@ def array_to_tags_string(tags: List[str]) -> str:
     return ','.join(map(str, tags))
 
 
-def array_to_task(array: List[str]) -> WdcTask:
-    return WdcTask(
-        id=array[0],
-        date=array[1],
-        start=array[2],
-        end=array[3],
-        tags=array[4],
-        description=array[5],
-        timestamp=array[6]
-    )
-
-
-def task_to_array(task: WdcTask) -> List[str]:
-    return [
-        task.id,
-        task.date,
-        task.start,
-        task.end,
-        task.tags,
-        task.description,
-        task.timestamp
-    ]
-
-
 def task_file_path(date: str):
     if not is_date_valid(date):
         raise ValueError(f'{date} is not a valid date')
 
-    return Path.joinpath(HOME_DIR_PATH, f'{to_date_no_day(date)}.csv')
+    return str(Path.joinpath(HOME_DIR_PATH, f'{to_date_no_day(date)}.csv'))
 
 
 def write_task(task: WdcTask):
-    # TODO: add capability to amend existing task
     HOME_DIR_PATH.mkdir(parents=True, exist_ok=True)
 
     with open(task_file_path(task.date), 'a', newline='') as file:
-        csv_writter = csv.writer(file, delimiter=';', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        csv_writer = csv.writer(file, delimiter=';', quotechar='|', quoting=csv.QUOTE_MINIMAL)
 
-        csv_writter.writerow(task_to_array(task))
+        csv_writer.writerow(to_array(task))
 
 
 def last_task(date: str) -> WdcTask:
@@ -88,7 +43,7 @@ def last_task(date: str) -> WdcTask:
 
     with open(file_path, 'r') as file:
         row = list(csv.reader(file, delimiter=';'))[-1]
-        return array_to_task(row)
+        return to_task(row)
 
 
 def read_all_tasks(date: str) -> List[WdcTask]:
@@ -101,7 +56,7 @@ def read_all_tasks(date: str) -> List[WdcTask]:
         return []
 
     with open(file_path, 'r') as file:
-        return list(map(lambda x: array_to_task(x), list(csv.reader(file, delimiter=';'))))
+        return list(map(lambda x: to_task(x), list(csv.reader(file, delimiter=';'))))
 
 
 def find_tasks(task_id: str) -> List[WdcTask]:
@@ -112,9 +67,14 @@ def find_tasks(task_id: str) -> List[WdcTask]:
     ret_val = []
     for file in work_day_files:
         with open(Path.joinpath(HOME_DIR_PATH, file), 'r') as openFile:
-            tasks = list(map(lambda x: array_to_task(x), list(csv.reader(openFile, delimiter=';'))))
+            tasks = list(map(lambda x: to_task(x), list(csv.reader(openFile, delimiter=';'))))
             for task in tasks:
                 if task.id == task_id:
                     ret_val.append(task)
 
     return sorted(ret_val, key=lambda t: int(t.timestamp))
+
+
+def write_file(content: str, path: str):
+    with open(path, 'w') as openFile:
+        openFile.write(content)
