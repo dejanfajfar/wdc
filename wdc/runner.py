@@ -8,6 +8,7 @@ from colored import fg, bg, attr
 
 from wdc.classes import WdcTask
 from wdc.controller.export_import import export_tasks, ExportType
+from wdc.exceptions import WdcError
 from wdc.time import is_time_valid, is_date_valid, today, WdcTime
 from wdc.calculator import calc_workday_end
 from wdc.controller.work_day import start_work_task, list_tasks, end_last_task, WdcTaskInfo, get_task_info, amend_task
@@ -110,6 +111,10 @@ def print_task_info(task_info: WdcTaskInfo):
     )
 
 
+def handle_error(error: WdcError) -> None:
+    print_error(error)
+
+
 @click.group()
 @click.option('--debug/--no-debug', default=False)
 @click.version_option(version='0.1')
@@ -144,7 +149,6 @@ def cli(ctx, debug):
     required=True,
     help='The optional duration of the standard workday given in hhmm format')
 def calc(ctx, workday_start, break_duration, workday_duration):
-
     wd_end = calc_workday_end(workday_start, break_duration, workday_duration)
 
     print(wd_end)
@@ -338,14 +342,29 @@ def amend(ctx, task_id, start, end, tag, message, date):
     type=bool,
     is_flag=True,
     help='Determines if the export should be formatted as csv')
-def export(ctx, date, output, csv):
+@click.option(
+    '--pipe',
+    default=False,
+    show_default=True,
+    type=bool,
+    is_flag=True,
+    help='Determines that the content of the exported file should be outputted to stout ')
+def export(ctx, date, output, csv, pipe):
     selected_export_type = ExportType.JSON
     if csv:
         selected_export_type = ExportType.CSV
 
-    export_tasks(date=date,
-                 file_path=output,
-                 export_to=selected_export_type)
+    result = ''
+
+    try:
+        result = export_tasks(date=date,
+                              file_path=output,
+                              export_to=selected_export_type)
+    except WdcError as error:
+        handle_error(error)
+
+    if pipe:
+        print(result)
 
 
 if __name__ == '__main__':

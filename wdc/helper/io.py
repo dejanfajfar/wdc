@@ -20,13 +20,13 @@ def task_file_path(date: str):
     if not is_date_valid(date):
         raise ValueError(f'{date} is not a valid date')
 
-    return str(Path.joinpath(HOME_DIR_PATH, f'{to_date_no_day(date)}.csv'))
+    return Path.joinpath(HOME_DIR_PATH, f'{to_date_no_day(date)}.csv')
 
 
 def write_task(task: WdcTask):
     HOME_DIR_PATH.mkdir(parents=True, exist_ok=True)
 
-    with open(task_file_path(task.date), 'a', newline='') as file:
+    with open(str(task_file_path(task.date)), 'a', newline='') as file:
         csv_writer = csv.writer(file, delimiter=';', quotechar='|', quoting=csv.QUOTE_MINIMAL)
 
         csv_writer.writerow(to_array(task))
@@ -41,7 +41,7 @@ def last_task(date: str) -> WdcTask:
     if not file_path.exists():
         raise FileNotFoundError(str(file_path))
 
-    with open(file_path, 'r') as file:
+    with open(str(file_path), 'r') as file:
         row = list(csv.reader(file, delimiter=';'))[-1]
         return to_task(row)
 
@@ -55,7 +55,7 @@ def read_all_tasks(date: str) -> List[WdcTask]:
     if not file_path.exists():
         return []
 
-    with open(file_path, 'r') as file:
+    with open(str(file_path), 'r') as file:
         return list(map(lambda x: to_task(x), list(csv.reader(file, delimiter=';'))))
 
 

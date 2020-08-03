@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import List
 
-from wdc.time import timestamp as ts, is_date_valid, is_time_valid
+from wdc.time import timestamp as ts
 
 
 @dataclass
@@ -13,9 +13,6 @@ class WdcTask(object):
     tags: str
     description: str
     timestamp: str = ts()
-
-    def is_valid(self) -> bool:
-        return is_date_valid(self.date) and is_time_valid(self.start) and is_time_valid(self.end)
 
     def __eq__(self, other):
         return self.id == other.id

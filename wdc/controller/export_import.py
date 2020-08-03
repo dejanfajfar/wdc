@@ -3,7 +3,7 @@ from enum import Enum
 
 from wdc.classes import WdcTask, to_array
 from wdc.helper.io import read_all_tasks, write_file
-from wdc.time import today, to_date_no_day
+from wdc.time import today, to_date_no_day, assert_date
 
 
 class WdcTaskJsonEncoder(json.JSONEncoder):
@@ -26,6 +26,8 @@ class ExportType(Enum):
 def export_tasks(date: str = '', file_path: str = '', export_to: ExportType = ExportType.JSON) -> str:
     if date == '':
         date = today()
+
+    assert_date(date)
 
     if file_path == '':
         file_path = f'./export_{to_date_no_day(date)}.{export_to.name}'
