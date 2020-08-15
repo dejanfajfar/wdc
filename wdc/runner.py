@@ -87,6 +87,19 @@ def print_error(text):
     print(f'{os.linesep}{fg(0)}{bg(202)}!! {text} {attr(0)}{os.linesep}')
 
 
+def print_info(text: str) -> None:
+    """
+    Prints an information type message to the the stdout
+    :param text: The text to be displayed as part of the info message.
+                if provided empty string then nothing is displayed
+    :return: Nothing
+    """
+    if not text:
+        return
+
+    print(f'{os.linesep}{fg(0)}{bg(164)}info: {text} {attr(0)}{os.linesep}')
+
+
 def print_task_info(task_info: WdcTaskInfo):
     def print_section_header(text): return print(
         f'{os.linesep}{fg(0)}{bg(111)}{attr(1)}:: {text} {attr(0)}{os.linesep}')
@@ -104,11 +117,15 @@ def print_task_info(task_info: WdcTaskInfo):
 
     print_section_header('History')
 
-    tt.print(
-        list(map(lambda i: task_to_history_print(i), task_info.history)),
-        header=['Timestamp', 'Date', 'Start', 'End', 'Tags', 'Description'],
-        style=tt.styles.rounded_double
-    )
+    if not task_info.history:
+        print_info('No history found')
+    else:
+
+        tt.print(
+            list(map(lambda i: task_to_history_print(i), task_info.history)),
+            header=['Timestamp', 'Date', 'Start', 'End', 'Tags', 'Description'],
+            style=tt.styles.rounded_double
+        )
 
 
 def handle_error(error: WdcError) -> None:
@@ -348,8 +365,18 @@ def amend(ctx, task_id, start, end, tag, message, date):
     show_default=True,
     type=bool,
     is_flag=True,
-    help='Determines that the content of the exported file should be outputted to stout ')
+    help='Determines that the content of the exported file should be outputted to stout')
 def export(ctx, date, output, csv, pipe):
+    """
+    The Export command implementation
+
+    :param ctx: The cli app context
+    :param date: The optional date to be exported (default is today)
+    :param output: The optional output file to which the tasks are to be exported
+    :param csv: Flag to denote that the export format should be CSV
+    :param pipe: A flag denoting that the export file content should be printed onto the stout stream
+    :return: Nothing
+    """
     selected_export_type = ExportType.JSON
     if csv:
         selected_export_type = ExportType.CSV
