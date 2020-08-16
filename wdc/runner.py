@@ -366,7 +366,15 @@ def amend(ctx, task_id, start, end, tag, message, date):
     type=bool,
     is_flag=True,
     help='Determines that the content of the exported file should be outputted to stout')
-def export(ctx, date, output, csv, pipe):
+@click.option(
+    '-r',
+    '--raw',
+    default=False,
+    type=bool,
+    is_flag=True,
+    help='Determines of all existing tasks should be returned or only the latest version of each'
+)
+def export(ctx, date, output, csv, pipe, raw):
     """
     The Export command implementation
 
@@ -375,6 +383,7 @@ def export(ctx, date, output, csv, pipe):
     :param output: The optional output file to which the tasks are to be exported
     :param csv: Flag to denote that the export format should be CSV
     :param pipe: A flag denoting that the export file content should be printed onto the stout stream
+    :param raw: If False then export only the latest version of each task. All if True
     :return: Nothing
     """
     selected_export_type = ExportType.JSON
@@ -386,7 +395,8 @@ def export(ctx, date, output, csv, pipe):
     try:
         result = export_tasks(date=date,
                               file_path=output,
-                              export_to=selected_export_type)
+                              export_to=selected_export_type,
+                              export_all=raw)
     except WdcError as error:
         handle_error(error)
 

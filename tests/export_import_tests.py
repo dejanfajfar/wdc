@@ -73,7 +73,7 @@ class WdcTaskJsonEncoderFixture(unittest.TestCase):
 class ExportTasksFixture(unittest.TestCase):
 
     @patch('wdc.controller.export_import.today')
-    @patch('wdc.controller.export_import.read_all_tasks')
+    @patch('wdc.controller.export_import.list_tasks')
     @patch('wdc.controller.export_import.write_file')
     def test_default_parameters(self, mock_writer, mock_reader, mock_today):
         mock_today.return_value = '2020-10-25'
@@ -104,7 +104,7 @@ class ExportTasksFixture(unittest.TestCase):
         self.assertIn(expected_dump, result)
 
     @patch('wdc.controller.export_import.today')
-    @patch('wdc.controller.export_import.read_all_tasks')
+    @patch('wdc.controller.export_import.list_tasks')
     @patch('wdc.controller.export_import.write_file')
     def test_fully_qualified_parameters(self, mock_writer, mock_reader, mock_today):
         mock_today.return_value = '2020-10-25'
@@ -137,7 +137,7 @@ class ExportTasksFixture(unittest.TestCase):
         self.assertIn(expected_dump, result)
 
     @patch('wdc.controller.export_import.today')
-    @patch('wdc.controller.export_import.read_all_tasks')
+    @patch('wdc.controller.export_import.list_tasks')
     @patch('wdc.controller.export_import.write_file')
     def test_csv_default_parameters(self, mock_writer, mock_reader, mock_today):
         mock_today.return_value = '2020-10-25'
@@ -159,7 +159,7 @@ class ExportTasksFixture(unittest.TestCase):
         self.assertIn(expected_dump, result)
 
     @patch('wdc.controller.export_import.today')
-    @patch('wdc.controller.export_import.read_all_tasks')
+    @patch('wdc.controller.export_import.list_tasks')
     @patch('wdc.controller.export_import.write_file')
     def test_csv_default_parameters_multiple_tasks(self, mock_writer, mock_reader, mock_today):
         mock_today.return_value = '2020-10-25'

@@ -334,10 +334,13 @@ class ExportCommandFixture(unittest.TestCase):
         self.assertEqual('', call_args['file_path'])
         # Assert that JSON is selected as the export type
         self.assertEqual(ExportType.JSON, call_args['export_to'])
+        # Assert that only the latest task version are requested
+        self.assertFalse(call_args['export_all'])
 
     @patch('wdc.runner.export_tasks')
     def test_all_options_given(self, mock_controller):
-        result = self.cli_runner.invoke(cli, ['export', '-d', '2020-10-25', '-o', 'export_today.csv', '--csv'])
+        result = self.cli_runner.invoke(cli,
+                                        ['export', '-d', '2020-10-25', '-o', 'export_today.csv', '--csv', '--raw'])
 
         self.assertEqual(0, result.exit_code)
 
@@ -349,6 +352,8 @@ class ExportCommandFixture(unittest.TestCase):
         self.assertEqual('export_today.csv', call_args['file_path'])
         # Assert that JSON is selected as the export type
         self.assertEqual(ExportType.CSV, call_args['export_to'])
+        # Assert that the RAW flag is set to true
+        self.assertTrue(call_args['export_all'])
 
 
 class PrintHelperFixture(unittest.TestCase):
