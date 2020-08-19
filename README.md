@@ -1,29 +1,50 @@
-# WDC
-
-***Command line work day helper and logger***
+![Logo](doc/logo/cover.png)
 
 ![CI](https://github.com/dejanfajfar/wdc/workflows/CI/badge.svg)
 [![PyPI version](https://badge.fury.io/py/wdc.svg)](https://badge.fury.io/py/wdc)
 
-![Logo](doc/logo/cover.png)
+# WDC
 
-# Purpose
+***Log work effortlessly***
 
-The purpose of **wdc** is to provide a simple _CLI_ application for time tracking.
+## About
 
-Born out of a nuisance that I could never tell when the working day was actually over and amazed overtime with little compensation.
+### Inspiration
 
-# Description
+Every company uses its own time tracking program. Sometimes as an freelancer I have to fill out multiple at once.
+If you are lucky those time tracking tools are actually useful and do not require exceeded effort to operate.
 
-Trying to come up with something better than: "timetracking in the CLI"
+Sadly from my experience this is not always the case...
 
-# Changelog
+Another _inspiration_ was to answer the question: How long do I have to work today?
+
+### Goals
+
+**WDC** has the following goals in no particular order:
+
+- Easy to use (if possible)
+- Calculate the end time of the current work day
+- Log basic work information
+  - Start time
+  - End time
+  - A descriptive message
+- Provide an easy way of grouping the logged work information
+- Export the logged items
+
+### Description
+
+Because this is **my** tools I have opted for a CLI tool that can be used on all systems.
+In order to achieve this **WDC** is written in python, which is readily available on all platforms.
+
+TBD
+
+## Changelog
 
 The changelog can be found [here](CHANGELOG.md)
 
-# Installation
+## Installation
 
-## From source code
+### From source code
 
 Clone the repository:
 
@@ -43,50 +64,44 @@ If make is not available on your system then you can run the underlying python c
 python setup.py install
 ```
 
-# Time format
+### Using PIP
 
-**wdc** uses a simplified time format similar to the military (_hhmm_). This uses a 24 hour format, so not AM/PM.
+> It is assumed that you have python and PIP installed
 
-The table below should provide some additional information and clarification on how this time format maps to the more standard 24 and 12 hour format
+**WDC** is published as openly accessible package on [pypi.org/project/wdc/](https://pypi.org/project/wdc/).
 
-| hhmm | 24 Hour | 12 hour |
-|---|---|---|
-|0000|00:00|12:00 AM
-|0100|01:00|01:00 AM
-|0200|02:00|02:00 AM
-|0300|03:00|03:00 AM
-|0400|04:00|04:00 AM
-|0500|05:00|05:00 AM
-|0600|06:00|06:00 AM
-|0700|07:00|07:00 AM
-|0800|08:00|08:00 AM
-|0900|09:00|09:00 AM
-|1000|10:00|10:00 AM
-|1100|11:00|11:00 AM
-|1200|12:00|12:00 PM
-|1300|13:00|01:00 PM
-|1400|14:00|02:00 PM
-|1500|15:00|03:00 PM
-|1600|16:00|04:00 PM
-|1700|17:00|05:00 PM
-|1800|18:00|06:00 PM
-|1900|19:00|07:00 PM
-|2000|20:00|08:00 PM
-|2100|21:00|09:00 PM
-|2200|22:00|10:00 PM
-|2300|23:00|11:00 PM
+Because of this it can be easilly installed using _pip_
 
-The minutes work as _expected_.
+```bash
+$ pip install wdc
+```
 
-# Date format
+## Formatting time
 
-**wdc** uses the standard _ISO8601_ date format (```YYYY-MM-DD```).
+In order to make **wdc** faster usable from the CLI we opted to represent time and dates is a optimized format.
 
-***sample***
+Details can be read at [Date and Time format wiki page](https://github.com/dejanfajfar/wdc/wiki/time-and-date)
 
-2020-10-25 -> 25th october 2020
+**Samples**
 
-# Commands
+25th of October 2020 ==> 2020-10-25
+
+11:30am ==> 1130
+
+4:30pm ==> 1630
+
+...
+
+## Commands
+
+**WDC** supports the following command:
+
+- ```wdc calc``` - Calculate the end time of the working day.
+
+  [Documentation](https://github.com/dejanfajfar/wdc/wiki/com-calc#calc-command) | [Samples](https://github.com/dejanfajfar/wdc/wiki/com-calc#examples)
+- ```wdc start``` - Start a new work task
+
+  [Documentation]()
 
 ## calc
 

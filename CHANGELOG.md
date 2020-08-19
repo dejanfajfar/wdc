@@ -9,7 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ```export``` command
 
 ### Fixed
-- Tasks with no histroy do not cause error on ```info``` command
+- Tasks with no history do not cause error on ```info``` command
+
+### Changed
+- Moved documentation to the wiki
 
 ## [0.3.9]
 ### Add
