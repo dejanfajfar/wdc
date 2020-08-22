@@ -76,6 +76,26 @@ Because of this it can be easilly installed using _pip_
 $ pip install wdc
 ```
 
+### Use the DOCKER image
+
+![Docker Image Version (latest by date)](https://img.shields.io/docker/v/dejanfajfar/wdc?sort=date)
+![Docker Pulls](https://img.shields.io/docker/pulls/dejanfajfar/wdc)
+
+Docker image home: [dejanfajfar/wdc](https://hub.docker.com/r/dejanfajfar/wdc)
+
+If you do not want to install **wdc** just yet you can test it from the safety of a docker image.
+
+To download and run the image use the following commands:
+
+```bash
+$ docker pull dejanfajfar/wdc
+$ docker run wdc -it sh
+```
+
+This will drop you into a shell where you can use **wdc** as if installed locally.
+
+**NOTE:** The file system is transient and changes made in the docker image will not transfer from session to session.
+
 ## Formatting time
 
 In order to make **wdc** faster usable from the CLI we opted to represent time and dates is a optimized format.
