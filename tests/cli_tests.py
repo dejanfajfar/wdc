@@ -2,9 +2,10 @@ import unittest
 from unittest.mock import patch
 from click.testing import CliRunner
 
+from wdc.controller.export_import import ExportType
 from wdc.controller.work_day import WdcTaskInfo
-from wdc.helper.io import WdcTask
-from wdc.runner import cli, task_to_printout
+from wdc.classes import WdcTask
+from wdc.runner import cli, task_to_printout, print_info
 from freezegun import freeze_time
 
 
@@ -307,3 +308,61 @@ class AmendTaskFixture(unittest.TestCase):
         result = self.cli_runner.invoke(cli, ['amend', 'id'])
 
         self.assertIn('!!', result.output)
+
+
+class ExportCommandFixture(unittest.TestCase):
+    """
+    Fixture for the EXPORT command of wdc
+
+    All unit tests regarding to the export command are located inside this class/fixture
+    """
+
+    def setUp(self):
+        self.cli_runner = CliRunner()
+
+    @patch('wdc.runner.export_tasks')
+    def test_no_options(self, mock_controller):
+        result = self.cli_runner.invoke(cli, ['export'])
+
+        self.assertEqual(0, result.exit_code)
+
+        call_args = mock_controller.call_args.kwargs
+
+        # Assert that no date to export is given
+        self.assertEqual('', call_args['date'])
+        # Assert that no output for the export is given
+        self.assertEqual('', call_args['file_path'])
+        # Assert that JSON is selected as the export type
+        self.assertEqual(ExportType.JSON, call_args['export_to'])
+        # Assert that only the latest task version are requested
+        self.assertFalse(call_args['export_all'])
+
+    @patch('wdc.runner.export_tasks')
+    def test_all_options_given(self, mock_controller):
+        result = self.cli_runner.invoke(cli,
+                                        ['export', '-d', '2020-10-25', '-o', 'export_today.csv', '--csv', '--raw'])
+
+        self.assertEqual(0, result.exit_code)
+
+        call_args = mock_controller.call_args.kwargs
+
+        # Assert that no date to export is given
+        self.assertEqual('2020-10-25', call_args['date'])
+        # Assert that no output for the export is given
+        self.assertEqual('export_today.csv', call_args['file_path'])
+        # Assert that JSON is selected as the export type
+        self.assertEqual(ExportType.CSV, call_args['export_to'])
+        # Assert that the RAW flag is set to true
+        self.assertTrue(call_args['export_all'])
+
+
+class PrintHelperFixture(unittest.TestCase):
+    """
+    Unit tests for all the print testing functions in the application
+    """
+
+    @patch('builtins.print')
+    def test_info(self, mock_print):
+        print_info('Test message')
+
+        mock_print.assert_called_with('\n\x1b[38;5;0m\x1b[48;5;164minfo: Test message \x1b[0m\n')

@@ -2,17 +2,29 @@ import re
 from datetime import datetime
 from time import time
 
+from wdc.exceptions import TimeFormatError, DateFormatError
 
-def is_time_valid(time: str) -> bool:
-    if time is None:
+
+def assert_time(time_str: str) -> None:
+    if not is_time_valid(time_str):
+        raise TimeFormatError(time_str)
+
+
+def assert_date(date_str: str) -> None:
+    if not is_date_valid(date_str):
+        raise DateFormatError(date_str)
+
+
+def is_time_valid(time_str: str) -> bool:
+    if time_str is None:
         return False
-    return re.match(r"(([01][0-9])|(2[0-3]))[0-5][0-9]", time) is not None
+    return re.match(r"(([01][0-9])|(2[0-3]))[0-5][0-9]", time_str) is not None
 
 
-def is_date_valid(date: str) -> bool:
-    if date is None:
+def is_date_valid(date_str: str) -> bool:
+    if date_str is None:
         return False
-    return re.match(r"(19|20)\d\d-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])", date) is not None
+    return re.match(r"(19|20)\d\d-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])", date_str) is not None
 
 
 def today() -> str:
@@ -20,18 +32,12 @@ def today() -> str:
     return now.strftime('%Y-%m-%d')
 
 
-def to_date_no_day(date_string: str) -> str:
-    if not is_date_valid(date_string):
-        raise ValueError(f'{date_string} is not a valid date string')
+def to_date_no_day(date_str: str) -> str:
+    assert_date(date_str)
 
-    date = datetime.strptime(date_string, '%Y-%m-%d')
+    date = datetime.strptime(date_str, '%Y-%m-%d')
 
     return date.strftime('%Y%m')
-
-
-def today_no_date() -> str:
-    now = datetime.now()
-    return now.strftime('%Y%m')
 
 
 def timestamp() -> str:

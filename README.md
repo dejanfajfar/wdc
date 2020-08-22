@@ -1,29 +1,50 @@
-# WDC
-
-***Command line work day helper and logger***
+![Logo](doc/logo/cover.png)
 
 ![CI](https://github.com/dejanfajfar/wdc/workflows/CI/badge.svg)
 [![PyPI version](https://badge.fury.io/py/wdc.svg)](https://badge.fury.io/py/wdc)
 
-![Logo](doc/logo/cover.png)
+# WDC
 
-# Purpose
+***Log work effortlessly***
 
-The purpose of **wdc** is to provide a simple _CLI_ application for time tracking.
+## About
 
-Born out of a nuisance that I could never tell when the working day was actually over and amazed overtime with little compensation.
+### Inspiration
 
-# Description
+Every company uses its own time tracking program. Sometimes as an freelancer I have to fill out multiple at once.
+If you are lucky those time tracking tools are actually useful and do not require exceeded effort to operate.
 
-Trying to come up with something better than: "timetracking in the CLI"
+Sadly from my experience this is not always the case...
 
-# Changelog
+Another _inspiration_ was to answer the question: How long do I have to work today?
+
+### Goals
+
+**WDC** has the following goals in no particular order:
+
+- Easy to use (if possible)
+- Calculate the end time of the current work day
+- Log basic work information
+  - Start time
+  - End time
+  - A descriptive message
+- Provide an easy way of grouping the logged work information
+- Export the logged items
+
+### Description
+
+Because this is **my** tool, I have opted for a CLI tool that can be used on all systems.
+In order to achieve this **WDC** is written in python, which is readily available on all platforms.
+
+TBD
+
+## Changelog
 
 The changelog can be found [here](CHANGELOG.md)
 
-# Installation
+## Installation
 
-## From source code
+### From source code
 
 Clone the repository:
 
@@ -43,320 +64,56 @@ If make is not available on your system then you can run the underlying python c
 python setup.py install
 ```
 
-# Time format
+### Using PIP
 
-**wdc** uses a simplified time format similar to the military (_hhmm_). This uses a 24 hour format, so not AM/PM.
+> It is assumed that you have python and PIP installed
 
-The table below should provide some additional information and clarification on how this time format maps to the more standard 24 and 12 hour format
+**WDC** is published as openly accessible package on [pypi.org/project/wdc/](https://pypi.org/project/wdc/).
 
-| hhmm | 24 Hour | 12 hour |
-|---|---|---|
-|0000|00:00|12:00 AM
-|0100|01:00|01:00 AM
-|0200|02:00|02:00 AM
-|0300|03:00|03:00 AM
-|0400|04:00|04:00 AM
-|0500|05:00|05:00 AM
-|0600|06:00|06:00 AM
-|0700|07:00|07:00 AM
-|0800|08:00|08:00 AM
-|0900|09:00|09:00 AM
-|1000|10:00|10:00 AM
-|1100|11:00|11:00 AM
-|1200|12:00|12:00 PM
-|1300|13:00|01:00 PM
-|1400|14:00|02:00 PM
-|1500|15:00|03:00 PM
-|1600|16:00|04:00 PM
-|1700|17:00|05:00 PM
-|1800|18:00|06:00 PM
-|1900|19:00|07:00 PM
-|2000|20:00|08:00 PM
-|2100|21:00|09:00 PM
-|2200|22:00|10:00 PM
-|2300|23:00|11:00 PM
-
-The minutes work as _expected_.
-
-# Date format
-
-**wdc** uses the standard _ISO8601_ date format (```YYYY-MM-DD```).
-
-***sample***
-
-2020-10-25 -> 25th october 2020
-
-# Commands
-
-## calc
-
-The calc command is used to calculate the theoretical end of the current working day.
-
-**sample**
+Because of this it can be easilly installed using _pip_
 
 ```bash
-$ wdc calc 0800
-1615
+$ pip install wdc
 ```
 
-### Arguments
+## Formatting time
 
-The time at which the work day started in the **hhmm** format
+In order to make **wdc** faster usable from the CLI we opted to represent time and dates is a optimized format.
 
-### Options
+Details can be read at [Date and Time format wiki page](https://github.com/dejanfajfar/wdc/wiki/time-and-date)
 
-#### -b, --break_duration
+**Samples**
 
-The duration of the lunch break in minutes.
+25th of October 2020 ==> 2020-10-25
 
-Default value is **30** minutes.
+11:30am ==> 1130
 
-If no break was consumed can be provided as 0.
+4:30pm ==> 1630
 
-##### Examples
+...
 
-Working day with 30 minute break
+## Commands
 
-```bash
-$ wdc 0800 -b 30
-```
+**WDC** supports the following command:
 
-Working day with no break
+- ```wdc calc``` - Calculate the end time of the working day.
 
-```bash
-$ wdc 0800 -b 0
-```
+  [Documentation](https://github.com/dejanfajfar/wdc/wiki/com-calc#calc-command) | [Samples](https://github.com/dejanfajfar/wdc/wiki/com-calc#examples)
+- ```wdc start``` - Start a new work task
 
-#### -d, --workday_duration
+  [Documentation](https://github.com/dejanfajfar/wdc/wiki/com-start#start-command) | [Samples](https://github.com/dejanfajfar/wdc/wiki/com-start#examples)
+- ```wdc end``` - Adds an end time to the last task of the day
 
-The duration of the workday in **hhmm** format
+  [Documentation](https://github.com/dejanfajfar/wdc/wiki/com-end#end-command) | [Samples](https://github.com/dejanfajfar/wdc/wiki/com-end#examples)
+- ```wdc list``` - List logged tasks
 
-Default value is **0745**.
+  [Documentation](https://github.com/dejanfajfar/wdc/wiki/com-list#list-command) | [Samples](https://github.com/dejanfajfar/wdc/wiki/com-list#examples)
+- ```wdc amend``` - Edit existing tasks
 
-### Examples
+  [Documentation](https://github.com/dejanfajfar/wdc/wiki/com-amend#amend-command) | [Samples](https://github.com/dejanfajfar/wdc/wiki/com-amend#examples)
+- ```wdc info``` - View information about logged tasks
 
-An 8 hour workday starting at 8:00
+  [Documentation](https://github.com/dejanfajfar/wdc/wiki/com-info#info-command) | [Samples](https://github.com/dejanfajfar/wdc/wiki/com-info#examples)
+- ```wdc export``` - Export tasks information
 
-```bash
-$ wdc 0800 -d 0800
-```
-
-## start
-
-Used to start a new work day task and store it.
-
-> In order to start a new task you do not have to call an end command. Just start the new task and the old one will be automatically closed
-
-**sample**
-
-```bash
-$ wdc start 0800 -t Customer -t Project -m The task description
-```
-
-### Arguments
-
-The time at which the task started in the **hhmm** format
-
-### Options
-
-#### -t, --tag
-
-Provide a generic tag to associate with the task.
-
-Multiple tags can be provided, if so then each has to be provided with its own ```-t``` or ```--tag``` option.
-
-#### -m, --message
-
-Provide a descriptive message to associate with the task
-
-#### -e, --end
-
-Provide an optional end time for the task in **hhmm** format
-
-#### -d, --date
-
-Provide the date to which this task should be associated to.
-
-### Examples
-
-Start an anonymous task
-
-```bash
-$ wdc start 0800
-```
-
-Start a task with a know end time
-
-```bash
-$ wdc start 0800 -e 0900
-```
-
-Start a task for a date other than today
-
-```bash
-wdc start 0800 -d 2020-01-01
-```
-
-## end
-
-Adds a end time to the last work task of the given day
-
-> If no date is provided the today is takes as a default
-
-**sample**
-
-```bash
-$ wdc end
-```
-
-### Arguments
-
-No arguments supported by the command
-
-### Options
-
-#### -d, --date
-
-Provide the optional date on which the last task should be closed
-
-#### -e, --end
-
-Provide an optional end time for the task in **hhmm** format
-
-> If not provided then the current time is taken
-
-### Examples
-
-End current working day with by providing an end time
-
-```bash
-$ wdc end -e 1630
-```
-
-End last task from another day
-
-```bash
-$ wdc end -d 2020-10-25
-```
-
-## list
-
-List all stored work tasks for the day
-
-**sample**
-
-```bash
-$ wdc list
-```
-
-### Arguments
-
-No arguments supported by the command
-
-### Options
-
-#### -d, --date
-
-Provide optional date for which tasks should be listed
-
-#### -a, --all
-
-Flag to denote if all tasks should be shown, or not
-
-> If set then the change history of each task will be returned
-
-### Examples
-
-List all tasks for today, even the internally duplicated ones
-
-```bash
-$ wdc list -a
-```
-
-List tasks for a given day
-
-```bash
-$ wdc list -d 2020-10-25
-```
-
-## info
-
-Provides detailed information about the given task
-
-***sample***
-
-```bash
-$ wdc info 0c3a9014
-```
-
-### Arguments
-
-The **id** of the task already recorded
-
-> The task ID can be retrieved with the list command
-
-### Options
-
-The command does not support any options at this point
-
-### Examples
-
-The only use case is shown in the sample.
-
-## amend
-
-Enables you to change an existing workday task
-
-> The original task is not changes only a new revision added
-
-***sample***
-
-```bash
-$ wdc amend 0c3a9014 -t my_tag
-```
-
-### Arguments
-
-The **id** of the task to be altered
-
-> The task ID can be retrieved with the list command
-
-### Options
-
-#### -s / --start
-
-The new value of the task start time
-
-#### -t /--tag
-
-The new tags to be associated with the task
-
-Multiple tags can be provided, if so then each has to be provided with its own ```-t``` or ```--tag``` option.
-
-> Note that the new tags will override the old one, They will **NOT** be appended to the existing ones
-
-#### -m / --message
-
-The new message for the work task
-
-#### -e / --end
-
-The new value of the task end time
-
-#### -d /--date
-
-The new date for the work task
-
-### Examples
-
-Apply multiple tags to the existing task
-
-```bash
-$ wdc amend 0c3a9014 -t tag1 -t tag2
-```
-
-Update the start time, end time and the message of the task
-
-```bash
-$ wdc amend 0c3a9014 -s 0900 -e 1030 -m "Updated message"
-```
+  [Documentation](https://github.com/dejanfajfar/wdc/wiki/com-export#export-command) | [Samples](https://github.com/dejanfajfar/wdc/wiki/com-export#examples)

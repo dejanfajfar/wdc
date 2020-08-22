@@ -1,6 +1,8 @@
 import unittest
 from freezegun import freeze_time
-from wdc.time import WdcTime, is_time_valid, today, is_date_valid, to_date_no_day, timestamp
+
+from wdc.exceptions import TimeFormatError, DateFormatError
+from wdc.time import WdcTime, is_time_valid, today, is_date_valid, timestamp, assert_time, assert_date
 
 
 class WdcTimeFixture(unittest.TestCase):
@@ -131,18 +133,32 @@ class IsDateValidFixture(unittest.TestCase):
         self.assertFalse(is_date_valid(''))
 
 
-class ToDateNoDayFixture(unittest.TestCase):
-    def test_valid(self):
-        test_result = to_date_no_day('2020-10-25')
-
-        self.assertEqual('202010', test_result)
-
-    def test_invalid_date_string(self):
-        self.assertRaises(ValueError, to_date_no_day, '99')
-
-
 class TimestampFixture(unittest.TestCase):
     @freeze_time('2020-10-25 10:00:00')
     def test_valid(self):
         test_object = timestamp()
         self.assertEqual('1603620000000', test_object)
+
+
+class AssertTimeFixture(unittest.TestCase):
+    def test_valid(self):
+        self.assertIsNone(assert_time('1221'))
+        self.assertIsNone(assert_time('0000'))
+        self.assertIsNone(assert_time('2359'))
+
+    def test_invalid(self):
+        self.assertRaises(TimeFormatError, assert_time, '9999')
+        self.assertRaises(TimeFormatError, assert_time, '')
+        self.assertRaises(TimeFormatError, assert_time, '2360')
+
+
+class AssertDateFixture(unittest.TestCase):
+    def test_valid(self):
+        self.assertIsNone(assert_date('2020-10-25'))
+
+    def test_invalid(self):
+        self.assertRaises(DateFormatError, assert_date, '')
+        self.assertRaises(DateFormatError, assert_date, '9999-99-99')
+        self.assertRaises(DateFormatError, assert_date, '2020.10.25')
+        self.assertRaises(DateFormatError, assert_date, '2020.1.30')
+        self.assertRaises(DateFormatError, assert_date, '2020.10.3')

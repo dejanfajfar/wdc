@@ -6,7 +6,9 @@ import click
 import termtables as tt
 from colored import fg, bg, attr
 
-from wdc.helper.io import WdcTask
+from wdc.classes import WdcTask
+from wdc.controller.export_import import export_tasks, ExportType
+from wdc.exceptions import WdcError
 from wdc.time import is_time_valid, is_date_valid, today, WdcTime
 from wdc.calculator import calc_workday_end
 from wdc.controller.work_day import start_work_task, list_tasks, end_last_task, WdcTaskInfo, get_task_info, amend_task
@@ -85,6 +87,19 @@ def print_error(text):
     print(f'{os.linesep}{fg(0)}{bg(202)}!! {text} {attr(0)}{os.linesep}')
 
 
+def print_info(text: str) -> None:
+    """
+    Prints an information type message to the the stdout
+    :param text: The text to be displayed as part of the info message.
+                if provided empty string then nothing is displayed
+    :return: Nothing
+    """
+    if not text:
+        return
+
+    print(f'{os.linesep}{fg(0)}{bg(164)}info: {text} {attr(0)}{os.linesep}')
+
+
 def print_task_info(task_info: WdcTaskInfo):
     def print_section_header(text): return print(
         f'{os.linesep}{fg(0)}{bg(111)}{attr(1)}:: {text} {attr(0)}{os.linesep}')
@@ -102,11 +117,19 @@ def print_task_info(task_info: WdcTaskInfo):
 
     print_section_header('History')
 
-    tt.print(
-        list(map(lambda i: task_to_history_print(i), task_info.history)),
-        header=['Timestamp', 'Date', 'Start', 'End', 'Tags', 'Description'],
-        style=tt.styles.rounded_double
-    )
+    if not task_info.history:
+        print_info('No history found')
+    else:
+
+        tt.print(
+            list(map(lambda i: task_to_history_print(i), task_info.history)),
+            header=['Timestamp', 'Date', 'Start', 'End', 'Tags', 'Description'],
+            style=tt.styles.rounded_double
+        )
+
+
+def handle_error(error: WdcError) -> None:
+    print_error(error)
 
 
 @click.group()
@@ -143,7 +166,6 @@ def cli(ctx, debug):
     required=True,
     help='The optional duration of the standard workday given in hhmm format')
 def calc(ctx, workday_start, break_duration, workday_duration):
-
     wd_end = calc_workday_end(workday_start, break_duration, workday_duration)
 
     print(wd_end)
@@ -311,6 +333,75 @@ def amend(ctx, task_id, start, end, tag, message, date):
         amend_task(task_id, tags=list(tag), start=start, end=end, message=message, date=date)
     except ValueError as error:
         print_error(error)
+
+
+@cli.command()
+@click.pass_context
+@click.option(
+    '-d',
+    '--date',
+    default='',
+    show_default=True,
+    callback=validate_date_callback,
+    type=str,
+    help='The date for which the tasks should be exported')
+@click.option(
+    '-o',
+    '--output',
+    default='',
+    show_default=True,
+    type=str,
+    help='The file path to where the export should be written')
+@click.option(
+    '--csv',
+    default=False,
+    show_default=True,
+    type=bool,
+    is_flag=True,
+    help='Determines if the export should be formatted as csv')
+@click.option(
+    '--pipe',
+    default=False,
+    show_default=True,
+    type=bool,
+    is_flag=True,
+    help='Determines that the content of the exported file should be outputted to stout')
+@click.option(
+    '-r',
+    '--raw',
+    default=False,
+    type=bool,
+    is_flag=True,
+    help='Determines of all existing tasks should be returned or only the latest version of each'
+)
+def export(ctx, date, output, csv, pipe, raw):
+    """
+    The Export command implementation
+
+    :param ctx: The cli app context
+    :param date: The optional date to be exported (default is today)
+    :param output: The optional output file to which the tasks are to be exported
+    :param csv: Flag to denote that the export format should be CSV
+    :param pipe: A flag denoting that the export file content should be printed onto the stout stream
+    :param raw: If False then export only the latest version of each task. All if True
+    :return: Nothing
+    """
+    selected_export_type = ExportType.JSON
+    if csv:
+        selected_export_type = ExportType.CSV
+
+    result = ''
+
+    try:
+        result = export_tasks(date=date,
+                              file_path=output,
+                              export_to=selected_export_type,
+                              export_all=raw)
+    except WdcError as error:
+        handle_error(error)
+
+    if pipe:
+        print(result)
 
 
 if __name__ == '__main__':
