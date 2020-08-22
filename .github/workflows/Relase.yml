@@ -157,14 +157,48 @@ jobs:
           name: wdc_whl
           path: dist
 
-      - name: Read file
-        id: version
-        uses: juliangruber/read-file-action@v1.0.0
-        with:
-          path: version
-
       - name: Publish a Python distribution to PyPI
         uses: pypa/gh-action-pypi-publish@master
         with:
           user: __token__
           password: ${{ secrets.PYPI_TOKEN }}
+
+  release-docker:
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Download a Build Artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: wdc_whl
+          path: dist
+
+      - name: Read version file
+        id: version
+        uses: juliangruber/read-file-action@v1.0.0
+        with:
+          path: version
+
+      - name: Build and push Docker images
+        uses: docker/build-push-action@v1
+        env:
+          WDC_VERSION: ${{ steps.version.outputs.content }}.${{ github.run_number }}
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          repository: dejanfajfar/wdc
+          tags: latest, $WDC_VERSION
+          add_git_labels: true
+          build_args: VERSION=$WDC_VERSION
+          tag_with_ref: true
+          tag_with_sha: true
+
+      - name: Push README to docker hub
+        uses: ms-jpq/sync-dockerhub-readme@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          repository: dejanfajfar/wdc
+          readme: "./README-DOCKER.md"

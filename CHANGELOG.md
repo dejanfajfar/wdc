@@ -4,7 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [unreleased]
+## [Unreleased]
+### Fixed
+- The image on the PYPI readme page is now linked to the RAW file on GitHub
+
+### Add
+- Playground docker image on docker hub
+
+## [0.4.10]
 ### Add
 - ```export``` command
 

@@ -1,4 +1,4 @@
-![LOGO](https://github.com/dejanfajfar/wdc/blob/master/doc/logo/cover.png)
+![LOGO](https://raw.githubusercontent.com/dejanfajfar/wdc/master/doc/logo/cover.png)
 
 # About
 
