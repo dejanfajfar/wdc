@@ -183,15 +183,13 @@ jobs:
 
       - name: Build and push Docker images
         uses: docker/build-push-action@v1
-        env:
-          WDC_VERSION: ${{ steps.version.outputs.content }}.${{ github.run_number }}
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
           repository: dejanfajfar/wdc
-          tags: latest, $WDC_VERSION
+          tags: latest, ${{ steps.version.outputs.content }}.${{ github.run_number }}
           add_git_labels: true
-          build_args: VERSION=$WDC_VERSION
+          build_args: VERSION=${{ steps.version.outputs.content }}.${{ github.run_number }}
           tag_with_ref: true
           tag_with_sha: true
 
