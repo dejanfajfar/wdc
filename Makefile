@@ -59,6 +59,11 @@ clean:
 	rm -rf wdc.egg-info
 
 #
+# Creates a local docker image from the current state of the application
+docker: dist
+	sudo docker build . -t wdc:dev-latest --build-arg VERSION=latest
+
+#
 # Starts a docker image with the latest build version of wdc and drops you into the cli in that docker image
-playground: dist
-	sudo docker run -it -v $(shell pwd):/wdccode python bash -c "pip install /wdccode/dist/*.whl & bash"
+playground: docker
+	sudo docker run -it -v $(shell pwd):/wdccode wdc:dev-latest sh
