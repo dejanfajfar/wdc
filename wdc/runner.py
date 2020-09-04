@@ -10,7 +10,7 @@ from wdc.classes import WdcTask
 from wdc.controller.export_import import export_tasks, ExportType
 from wdc.exceptions import WdcError
 from wdc.time import is_time_valid, is_date_valid, today, WdcTime
-from wdc.calculator import calc_workday_end
+from wdc.controller.calculator import calculate
 from wdc.controller.work_day import start_work_task, list_tasks, end_last_task, WdcTaskInfo, get_task_info, amend_task
 
 
@@ -166,7 +166,7 @@ def cli(ctx, debug):
     required=True,
     help='The optional duration of the standard workday given in hhmm format')
 def calc(ctx, workday_start, break_duration, workday_duration):
-    wd_end = calc_workday_end(workday_start, break_duration, workday_duration)
+    wd_end = calculate(workday_start, break_duration, workday_duration)
 
     print(wd_end)
 
@@ -403,6 +403,11 @@ def export(ctx, date, output, csv, pipe, raw):
     if pipe:
         print(result)
 
+
+@cli.command()
+@click.pass_context
+def stats(ctx):
+    pass
 
 if __name__ == '__main__':
     cli(obj={})

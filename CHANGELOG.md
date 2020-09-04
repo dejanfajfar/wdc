@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Added reference to the Docker playground
 
+### Changed
+- Moved ```calculator``` controller to the controller folder
+
 ## [0.4.12]
 ### Fixed
 - The image on the PYPI readme page is now linked to the RAW file on GitHub

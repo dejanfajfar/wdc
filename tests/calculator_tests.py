@@ -1,6 +1,6 @@
 import unittest
 
-from wdc.calculator import calc_workday_end
+from wdc.controller.calculator import calculate
 
 
 class CalculatorFixture(unittest.TestCase):
@@ -14,5 +14,5 @@ class CalculatorFixture(unittest.TestCase):
 
         for scenario in scenarios:
             with self.subTest(scenario):
-                result = calc_workday_end(scenario[0], scenario[1], scenario[2])
+                result = calculate(scenario[0], scenario[1], scenario[2])
                 self.assertEqual(str(result), scenario[3])
