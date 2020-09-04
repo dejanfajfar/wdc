@@ -21,6 +21,22 @@ class WdcTask(object):
         return hash(self.id)
 
 
+def is_valid(task: WdcTask) -> bool:
+    """
+    Determines if a WdcTasks is valid as per definition
+    :param task: The task instance to be validated
+    :return: True if the WdcTask instance is valid, False if not
+    """
+
+    if task is None:
+        return False
+
+    if not task.id or not task.start or not task.timestamp:
+        return False
+
+    return True
+
+
 def to_task(array: List[str]) -> WdcTask:
     return WdcTask(
         id=array[0],
