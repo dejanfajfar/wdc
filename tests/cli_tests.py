@@ -3,8 +3,7 @@ from unittest.mock import patch
 from click.testing import CliRunner
 
 from wdc.controller.export_import import ExportType
-from wdc.controller.work_day import WdcTaskInfo
-from wdc.classes import WdcTask
+from wdc.classes import WdcTask, WdcTaskInfo
 from wdc.runner import cli, task_to_printout, print_info
 from freezegun import freeze_time
 

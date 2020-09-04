@@ -1,33 +1,9 @@
 from wdc.helper.io import read_all_tasks, last_task, write_task, find_tasks, array_to_tags_string
-from wdc.classes import WdcTask
+from wdc.classes import WdcTask, WdcTaskInfo
 from wdc.helper.hash import generate_hash
 from wdc.time import WdcTime, today, is_date_valid, is_time_valid, timestamp
 
 from typing import List
-
-
-class WdcTaskInfo(object):
-    def __init__(self, tasks: List[WdcTask]):
-        self._raw_tasks = tasks
-        self._raw_tasks.sort(key=lambda t: int(t.timestamp), reverse=True)
-
-    @property
-    def current(self) -> WdcTask:
-        if len(self._raw_tasks) > 0:
-            return self._raw_tasks[0]
-        else:
-            return None
-
-    @property
-    def is_valid(self):
-        return True
-
-    @property
-    def history(self) -> List[WdcTask]:
-        if len(self._raw_tasks) > 1:
-            return self._raw_tasks[1:]
-        else:
-            return []
 
 
 def sort_by_time(tasks: List[WdcTask], descending: bool = False) -> List[WdcTask]:

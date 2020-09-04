@@ -6,12 +6,12 @@ import click
 import termtables as tt
 from colored import fg, bg, attr
 
-from wdc.classes import WdcTask
+from wdc.classes import WdcTask, WdcTaskInfo
 from wdc.controller.export_import import export_tasks, ExportType
 from wdc.exceptions import WdcError
 from wdc.time import is_time_valid, is_date_valid, today, WdcTime
 from wdc.controller.calculator import calculate
-from wdc.controller.work_day import start_work_task, list_tasks, end_last_task, WdcTaskInfo, get_task_info, amend_task
+from wdc.controller.tasks import start_work_task, list_tasks, end_last_task, get_task_info, amend_task
 
 
 def validate_break_duration_callback(ctx, param, value):

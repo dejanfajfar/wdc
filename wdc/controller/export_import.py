@@ -2,7 +2,7 @@ import json
 from enum import Enum
 
 from wdc.classes import WdcTask, to_array
-from wdc.controller.work_day import list_tasks
+from wdc.controller.tasks import list_tasks
 from wdc.helper.io import write_file
 from wdc.time import today, to_date_no_day, assert_date
 

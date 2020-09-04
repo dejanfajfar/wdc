@@ -1,8 +1,8 @@
 import unittest
 from unittest.mock import patch
 from freezegun import freeze_time
-from wdc.controller.work_day import start_work_task, list_tasks, WdcTaskInfo, get_task_info, amend_task, sort_by_time
-from wdc.classes import WdcTask
+from wdc.controller.tasks import start_work_task, list_tasks, get_task_info, amend_task, sort_by_time
+from wdc.classes import WdcTask, WdcTaskInfo
 
 
 class StartWorkdayTaskFixture(unittest.TestCase):
