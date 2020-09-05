@@ -1,6 +1,8 @@
+import secrets
+
 from wdc.helper.io import read_all_tasks, last_task, write_task, find_tasks, array_to_tags_string
 from wdc.classes import WdcTask, WdcTaskInfo
-from wdc.helper.hash import generate_hash
+from wdc.persistence.task_store import WdcTaskStore
 from wdc.time import WdcTime, today, is_date_valid, is_time_valid, timestamp
 
 from typing import List
@@ -20,9 +22,9 @@ def start_work_task(start_time: str, end_time: str, tags: List[str], description
     # When no date is provided then we assume "today"
     date = date if date else today()
 
-    row_id = generate_hash(f'{start_time}{end_time}{description}')
+    row_id = secrets.token_hex(4)
 
-    task_data = WdcTask(
+    new_task = WdcTask(
         id=row_id,
         date=date,
         start=str(start),
@@ -31,7 +33,7 @@ def start_work_task(start_time: str, end_time: str, tags: List[str], description
         description=description
     )
 
-    write_task(task_data)
+    WdcTaskStore().load(new_task.date).add(new_task).save()
 
 
 def end_last_task(date: str, time: str):
