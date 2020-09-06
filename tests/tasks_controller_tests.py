@@ -8,25 +8,26 @@ from wdc.classes import WdcTask, WdcTaskInfo
 class StartWorkdayTaskFixture(unittest.TestCase):
 
     @freeze_time('2019-10-25')
-    @patch('wdc.controller.work_day.write_task')
-    def test_only_start_given(self, mock_write_line):
+    @patch('wdc.controller.tasks.WdcTaskStore.add')
+    def test_only_start_given(self, mock_storage_add):
         start_work_task('0800', '', [], '', '')
 
-        mock_write_line.assert_called()
-        call_args = mock_write_line.call_args.args[0]
+        mock_storage_add.assert_called()
 
-        self.assertEqual('2019-10-25', call_args.date)
-        self.assertEqual('0800', call_args.start)
-        self.assertEqual('', call_args.end)
-        self.assertEqual('', call_args.tags)
-        self.assertEqual('', call_args.description)
+        call_task = mock_storage_add.call_args.args[0]
 
-    @patch('wdc.controller.work_day.write_task')
-    def test_all_parameters_given(self, mock_append_line):
+        self.assertEqual('2019-10-25', call_task.date)
+        self.assertEqual('0800', call_task.start)
+        self.assertEqual('', call_task.end)
+        self.assertEqual('', call_task.tags)
+        self.assertEqual('', call_task.description)
+
+    @patch('wdc.controller.tasks.WdcTaskStore.add')
+    def test_all_parameters_given(self, mock_storage_add):
         start_work_task('0800', '0815', ['t1', 't2'], 'description', '2020-10-25')
 
-        mock_append_line.assert_called()
-        call_args = mock_append_line.call_args.args[0]
+        mock_storage_add.assert_called()
+        call_args = mock_storage_add.call_args.args[0]
 
         self.assertEqual('2020-10-25', call_args.date)
         self.assertEqual('0800', call_args.start)
@@ -34,12 +35,12 @@ class StartWorkdayTaskFixture(unittest.TestCase):
         self.assertEqual('t1,t2', call_args.tags)
         self.assertEqual('description', call_args.description)
 
-    @patch('wdc.controller.work_day.write_task')
-    def test_no_end_time_given(self, mock_append_line):
+    @patch('wdc.controller.tasks.WdcTaskStore.add')
+    def test_no_end_time_given(self, mock_storage_add):
         start_work_task('0800', '', ['t1', 't2'], 'description', '2020-10-25')
 
-        mock_append_line.assert_called()
-        call_args = mock_append_line.call_args.args[0]
+        mock_storage_add.assert_called()
+        call_args = mock_storage_add.call_args.args[0]
 
         self.assertEqual('2020-10-25', call_args.date)
         self.assertEqual('0800', call_args.start)
@@ -47,12 +48,12 @@ class StartWorkdayTaskFixture(unittest.TestCase):
         self.assertEqual('t1,t2', call_args.tags)
         self.assertEqual('description', call_args.description)
 
-    @patch('wdc.controller.work_day.write_task')
-    def test_no_tags_given(self, mock_append_line):
+    @patch('wdc.controller.tasks.WdcTaskStore.add')
+    def test_no_tags_given(self, mock_storage_add):
         start_work_task('0800', '0815', [], 'description', '2020-10-25')
 
-        mock_append_line.assert_called()
-        call_args = mock_append_line.call_args.args[0]
+        mock_storage_add.assert_called()
+        call_args = mock_storage_add.call_args.args[0]
 
         self.assertEqual('2020-10-25', call_args.date)
         self.assertEqual('0800', call_args.start)
@@ -60,12 +61,12 @@ class StartWorkdayTaskFixture(unittest.TestCase):
         self.assertEqual('', call_args.tags)
         self.assertEqual('description', call_args.description)
 
-    @patch('wdc.controller.work_day.write_task')
-    def test_no_description_given(self, mock_append_line):
+    @patch('wdc.controller.tasks.WdcTaskStore.add')
+    def test_no_description_given(self, mock_storage_add):
         start_work_task('0800', '0815', ['t1', 't2'], '', '2020-10-25')
 
-        mock_append_line.assert_called()
-        call_args = mock_append_line.call_args.args[0]
+        mock_storage_add.assert_called()
+        call_args = mock_storage_add.call_args.args[0]
 
         self.assertEqual('2020-10-25', call_args.date)
         self.assertEqual('0800', call_args.start)
@@ -74,12 +75,12 @@ class StartWorkdayTaskFixture(unittest.TestCase):
         self.assertEqual('', call_args.description)
 
     @freeze_time('2019-10-25')
-    @patch('wdc.controller.work_day.write_task')
-    def test_no_date_then_today(self, mock_append_line):
+    @patch('wdc.controller.tasks.WdcTaskStore.add')
+    def test_no_date_then_today(self, mock_storage_add):
         start_work_task('0800', '0815', ['t1', 't2'], 'description', '')
 
-        mock_append_line.assert_called()
-        call_args = mock_append_line.call_args.args[0]
+        mock_storage_add.assert_called()
+        call_args = mock_storage_add.call_args.args[0]
 
         self.assertEqual('2019-10-25', call_args.date)
         self.assertEqual('0800', call_args.start)
@@ -101,7 +102,7 @@ class ListWorkTasksFixture(unittest.TestCase):
     def test_invalid_date(self):
         self.assertRaises(ValueError, list_tasks, '9999-99-99', False)
 
-    @patch('wdc.controller.work_day.read_all_tasks')
+    @patch('wdc.controller.tasks.read_all_tasks')
     def test_return_tasks_for_given_day(self, mock_reader):
         mock_reader.return_value = [
             WdcTask(
@@ -129,7 +130,7 @@ class ListWorkTasksFixture(unittest.TestCase):
         self.assertEqual(1, len(results))
         self.assertEqual('task1', results[0].id)
 
-    @patch('wdc.controller.work_day.read_all_tasks')
+    @patch('wdc.controller.tasks.read_all_tasks')
     def test_task_are_sorted(self, mock_reader):
         mock_reader.return_value = [
             WdcTask(
@@ -158,7 +159,7 @@ class ListWorkTasksFixture(unittest.TestCase):
         self.assertEqual('task2', results[0].id)
         self.assertEqual('task1', results[1].id)
 
-    @patch('wdc.controller.work_day.read_all_tasks')
+    @patch('wdc.controller.tasks.read_all_tasks')
     def test_filter_duplicate_tasks(self, mock_reader):
         mock_reader.return_value = [
             WdcTask(
@@ -186,7 +187,7 @@ class ListWorkTasksFixture(unittest.TestCase):
         self.assertEqual(1, len(results))
         self.assertEqual('1000', results[0].end)
 
-    @patch('wdc.controller.work_day.read_all_tasks')
+    @patch('wdc.controller.tasks.read_all_tasks')
     def test_duplicates_on_beginning(self, mock_reader):
         mock_reader.return_value = [
             WdcTask(
@@ -227,7 +228,7 @@ class ListWorkTasksFixture(unittest.TestCase):
         self.assertEqual('task2', results[1].id)
         self.assertEqual('33', results[1].timestamp)
 
-    @patch('wdc.controller.work_day.read_all_tasks')
+    @patch('wdc.controller.tasks.read_all_tasks')
     def test_duplicates_on_end(self, mock_reader):
         mock_reader.return_value = [
             WdcTask(
@@ -272,7 +273,7 @@ class FindTaskFixture(unittest.TestCase):
     def test_invalid_task_id(self):
         self.assertIsNone(get_task_info(''))
 
-    @patch('wdc.controller.work_day.find_tasks')
+    @patch('wdc.controller.tasks.find_tasks')
     def test_no_tasks_found(self, mock_reader):
         mock_reader.return_value = []
 
@@ -321,8 +322,8 @@ class WdcTaskInfoFixture(unittest.TestCase):
 
 class AmendTaskFixture(unittest.TestCase):
 
-    @patch('wdc.controller.work_day.get_task_info')
-    @patch('wdc.controller.work_day.write_task')
+    @patch('wdc.controller.tasks.get_task_info')
+    @patch('wdc.controller.tasks.write_task')
     def test_replace_all(self, mock_writer, mock_reader):
         mock_reader.return_value = WdcTaskInfo([
             WdcTask(
@@ -349,8 +350,8 @@ class AmendTaskFixture(unittest.TestCase):
         self.assertEqual('test message', call_args.description)
         self.assertEqual('2020-08-18', call_args.date)
 
-    @patch('wdc.controller.work_day.get_task_info')
-    @patch('wdc.controller.work_day.write_task')
+    @patch('wdc.controller.tasks.get_task_info')
+    @patch('wdc.controller.tasks.write_task')
     def test_none_replaced(self, mock_writer, mock_reader):
         mock_reader.return_value = WdcTaskInfo([
             WdcTask(

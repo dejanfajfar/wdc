@@ -32,6 +32,10 @@ def write_task(task: WdcTask):
         csv_writer.writerow(to_array(task))
 
 
+def write_tasks(tasks: List[WdcTask]):
+    pass
+
+
 def last_task(date: str) -> WdcTask:
     if not is_date_valid(date):
         raise ValueError(f'{date} is not a valid date')

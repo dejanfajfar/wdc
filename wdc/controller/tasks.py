@@ -33,7 +33,7 @@ def start_work_task(start_time: str, end_time: str, tags: List[str], description
         description=description
     )
 
-    WdcTaskStore().load(new_task.date).add(new_task).save()
+    WdcTaskStore().add(new_task)
 
 
 def end_last_task(date: str, time: str):
