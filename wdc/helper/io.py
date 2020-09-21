@@ -32,8 +32,13 @@ def write_task(task: WdcTask):
         csv_writer.writerow(to_array(task))
 
 
-def write_tasks(tasks: List[WdcTask]):
-    pass
+def write_tasks(tasks: List[WdcTask], date: str = ""):
+    HOME_DIR_PATH.mkdir(parents=True, exist_ok=True)
+
+    with open(str(task_file_path(date)), 'w', newline='') as file:
+        csv_writer = csv.writer(file, delimiter=';', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        for task in tasks:
+            csv_writer.writerow(to_array(task))
 
 
 def last_task(date: str) -> WdcTask:
@@ -77,6 +82,16 @@ def find_tasks(task_id: str) -> List[WdcTask]:
                     ret_val.append(task)
 
     return sorted(ret_val, key=lambda t: int(t.timestamp))
+
+
+def find_task_date(task_id: str) -> str:
+    all_files = [f for f in listdir(HOME_DIR_PATH) if isfile(join(HOME_DIR_PATH, f))]
+    work_day_files = list(filter(lambda f: f.endswith('csv'), all_files))
+
+    for file_name in work_day_files:
+        with open(Path.joinpath(HOME_DIR_PATH, file_name), 'r') as openFile:
+            if task_id in openFile.read():
+                return file_name[:-4]
 
 
 def write_file(content: str, path: str):

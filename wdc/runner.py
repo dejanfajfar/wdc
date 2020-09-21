@@ -6,12 +6,12 @@ import click
 import termtables as tt
 from colored import fg, bg, attr
 
-from wdc.classes import WdcTask, WdcTaskInfo
+from wdc.classes import WdcTask
 from wdc.controller.export_import import export_tasks, ExportType
 from wdc.exceptions import WdcError
 from wdc.time import is_time_valid, is_date_valid, today, WdcTime
 from wdc.controller.calculator import calculate
-from wdc.controller.tasks import start_work_task, list_tasks, end_last_task, get_task_info, amend_task
+from wdc.controller.tasks import start_work_task, list_tasks, end_last_task, amend_task
 
 
 def validate_break_duration_callback(ctx, param, value):
@@ -98,34 +98,6 @@ def print_info(text: str) -> None:
         return
 
     print(f'{os.linesep}{fg(0)}{bg(164)}info: {text} {attr(0)}{os.linesep}')
-
-
-def print_task_info(task_info: WdcTaskInfo):
-    def print_section_header(text): return print(
-        f'{os.linesep}{fg(0)}{bg(111)}{attr(1)}:: {text} {attr(0)}{os.linesep}')
-
-    def print_task_attribute(attribute, value): return print(f'{attribute} :\t{value}')
-
-    print_section_header('Current')
-    current = task_info.current
-    print_task_attribute('id         ', current.id)
-    print_task_attribute('description', current.description)
-    print_task_attribute('timestamp  ', current.timestamp)
-    print_task_attribute('start      ', current.start)
-    print_task_attribute('end        ', current.end)
-    print_task_attribute('tags       ', current.tags)
-
-    print_section_header('History')
-
-    if not task_info.history:
-        print_info('No history found')
-    else:
-
-        tt.print(
-            list(map(lambda i: task_to_history_print(i), task_info.history)),
-            header=['Timestamp', 'Date', 'Start', 'End', 'Tags', 'Description'],
-            style=tt.styles.rounded_double
-        )
 
 
 def handle_error(error: WdcError) -> None:
@@ -224,15 +196,8 @@ def start(ctx, task_start, end, tag, message, date):
     callback=validate_date_callback,
     type=str,
     help='The date for which the tasks should be shown ')
-@click.option(
-    '-a',
-    '--all',
-    is_flag=True,
-    default=False,
-    help='Show duplicates of time entries'
-)
-def list_all(ctx, date, all):
-    tasks = list_tasks(date, all)
+def list_all(ctx, date):
+    tasks = list_tasks(date)
 
     tasks_to_print = []
     for task in tasks:
@@ -267,21 +232,6 @@ def list_all(ctx, date, all):
     help='The time at which the work task was finished')
 def end(ctx, date, end):
     end_last_task(date, end)
-
-
-@cli.command()
-@click.pass_context
-@click.argument(
-    'task_id',
-    type=str,
-    callback=validate_taskid_callback)
-def info(ctx, task_id):
-    task_info = get_task_info(task_id)
-
-    if task_info:
-        print_task_info(task_info)
-    else:
-        print(f'Task with id {task_id} not found.')
 
 
 @cli.command()

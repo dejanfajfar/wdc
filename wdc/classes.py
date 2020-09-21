@@ -59,27 +59,3 @@ def to_array(task: WdcTask) -> List[str]:
         task.description,
         task.timestamp
     ]
-
-
-class WdcTaskInfo(object):
-    def __init__(self, tasks: List[WdcTask]):
-        self._raw_tasks = tasks
-        self._raw_tasks.sort(key=lambda t: int(t.timestamp), reverse=True)
-
-    @property
-    def current(self) -> WdcTask:
-        if len(self._raw_tasks) > 0:
-            return self._raw_tasks[0]
-        else:
-            return None
-
-    @property
-    def is_valid(self):
-        return True
-
-    @property
-    def history(self) -> List[WdcTask]:
-        if len(self._raw_tasks) > 1:
-            return self._raw_tasks[1:]
-        else:
-            return []

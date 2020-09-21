@@ -1,39 +1,46 @@
-from typing import List
+from typing import List, Callable
 
 from wdc.classes import WdcTask
-from wdc.helper.io import read_all_tasks, write_tasks
-from wdc.time import assert_date, today
+from wdc.exceptions import TaskOverlapError
+from wdc.helper.io import read_all_tasks, write_tasks, find_tasks
+from wdc.helper.taks import would_task_overlap
+from wdc.time import assert_date
 
 
 class WdcTaskStore(object):
-    def __init__(self):
-        self._tasks: List[WdcTask] = []
-        self.is_loaded = False
-
-    def load(self, date: str = today()):
+    def __init__(self, date: str):
         assert_date(date)
         self._tasks = read_all_tasks(date)
         self.is_loaded = True
-        return self
+        self._date = date
 
     def save(self):
         self._tasks.sort(key=lambda t: (t.date, t.start))
 
-        write_tasks(self._tasks)
+        write_tasks(self._tasks, self._date)
 
     def add(self, task: WdcTask):
-        """
-        Adds or updates the given Task
-        :param task: The task to add or update
-        """
-        if not self.is_loaded:
-            self.load(task.date)
-
-        if self.contains(task):
-            # TODO: Rework to replace the existing task with the new one.
-            self._tasks.append(task)
+        if not would_task_overlap(task, self._tasks):
+            if self.contains(task):
+                self._tasks = list(map(lambda t: task if t.id == task.id else t, self._tasks))
+            else:
+                self._tasks.append(task)
         else:
-            self._tasks.append(task)
+            raise TaskOverlapError(task.id)
+
+        self.save()
+
+    def get(self, predicate: Callable[[WdcTask], bool] = lambda t: True) -> List[WdcTask]:
+        for task in self._tasks:
+            if predicate(task):
+                yield task
+
+    def last(self):
+        return self._tasks[-1]
+
+    def add_and_save(self, task: WdcTask):
+        self.add(task)
+        self.save()
 
     def contains(self, task: WdcTask) -> bool:
         for _task in self._tasks:
@@ -41,3 +48,13 @@ class WdcTaskStore(object):
                 return True
 
         return False
+
+
+def find_stores(task_id: str) -> List[WdcTaskStore]:
+    tasks = find_tasks(task_id)
+    task_stores = []
+    if tasks:
+        for task in tasks:
+            task_stores = WdcTaskStore(task.date)
+
+    return task_stores

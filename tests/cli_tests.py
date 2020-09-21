@@ -3,7 +3,7 @@ from unittest.mock import patch
 from click.testing import CliRunner
 
 from wdc.controller.export_import import ExportType
-from wdc.classes import WdcTask, WdcTaskInfo
+from wdc.classes import WdcTask
 from wdc.runner import cli, task_to_printout, print_info
 from freezegun import freeze_time
 
@@ -157,7 +157,7 @@ class ListWorkTasksFixture(unittest.TestCase):
 
 
 class HelperFunctionsFixture(unittest.TestCase):
-    def test_ttask_to_printout_valid(self):
+    def test_task_to_printout_valid(self):
         test_object = WdcTask(
             id='testId',
             date='2020-10-25',
@@ -171,102 +171,6 @@ class HelperFunctionsFixture(unittest.TestCase):
         result = task_to_printout(test_object)
 
         self.assertSequenceEqual(result, ['testId', '2020-10-25', '08:00', '09:00', 't1', 'testDescri..'])
-
-
-class InfoCommandFixture(unittest.TestCase):
-    def setUp(self):
-        self.cli_runner = CliRunner()
-
-    @patch('wdc.runner.get_task_info')
-    def test_no_task_found(self, mock_controller):
-        mock_controller.return_value = None
-
-        result = self.cli_runner.invoke(cli, ['info', 'testId'])
-
-        self.assertIn('Task with id testId not found', result.output)
-
-    @patch('wdc.runner.get_task_info')
-    def test_with_history_valid(self, mock_controller):
-        mock_controller.return_value = WdcTaskInfo([
-            WdcTask(
-                id='testId',
-                date='2020-10-25',
-                start='0800',
-                end='',
-                tags='t1',
-                description='testDescription',
-                timestamp='11'
-            ),
-            WdcTask(
-                id='testId',
-                date='2020-10-25',
-                start='0800',
-                end='1000',
-                tags='t1',
-                description='testDescription',
-                timestamp='12'
-            ),
-            WdcTask(
-                id='testId',
-                date='2020-10-25',
-                start='0800',
-                end='1000',
-                tags='t1, t2',
-                description='testDescription',
-                timestamp='13'
-            )
-        ])
-
-        result = self.cli_runner.invoke(cli, ['info', 'testId'])
-
-        self.assertIn('id          :	testId', result.output)
-        self.assertIn('description :	testDescription', result.output)
-        self.assertIn('timestamp   :	13', result.output)
-        self.assertIn('start       :	0800', result.output)
-        self.assertIn('end         :	1000', result.output)
-        self.assertIn('tags        :	t1, t2', result.output)
-
-        self.assertIn('│ 12        │ 2020-10-25 │ 08:00 │ 10:00 │ t1   │ testDescription │', result.output)
-        self.assertIn('│ 11        │ 2020-10-25 │ 08:00 │       │ t1   │ testDescription │', result.output)
-
-    @patch('wdc.runner.get_task_info')
-    def test_no_history_valid(self, mock_controller):
-        mock_controller.return_value = WdcTaskInfo([
-            WdcTask(
-                id='testId',
-                date='2020-10-25',
-                start='0800',
-                end='',
-                tags='t1',
-                description='testDescription',
-                timestamp='11'
-            )
-        ])
-
-        result = self.cli_runner.invoke(cli, ['info', 'testId'])
-
-        self.assertIn('id          :	testId', result.output)
-        self.assertIn('description :	testDescription', result.output)
-        self.assertIn('timestamp   :	11', result.output)
-        self.assertIn('start       :	0800', result.output)
-        self.assertIn('tags        :	t1', result.output)
-
-        # If there is no history then the table is not displayed.
-        # Check that the table header is not present in the output
-        self.assertNotIn('│ Timestamp │ Date       │ Start │ End   │ Tags   │ Description     │', result.output)
-
-    @patch('wdc.runner.get_task_info')
-    def test_not_found(self, mock_controller):
-        mock_controller.return_value = None
-
-        result = self.cli_runner.invoke(cli, ['info', 'testId'])
-
-        self.assertIn('Task with id testId not found.', result.output)
-
-    def test_invalid_taskid(self):
-        result = self.cli_runner.invoke(cli, ['info', ''])
-
-        self.assertEqual(2, result.exit_code)
 
 
 class AmendTaskFixture(unittest.TestCase):

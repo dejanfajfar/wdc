@@ -5,11 +5,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- Proper data abstraction layer
+
 ### Fixed
 - Added reference to the Docker playground
 
 ### Changed
 - Moved ```calculator``` controller to the controller folder
+
+### Removed
+- Removed individual task history
+- ```list``` command's ```-a``` option
+- ```info``` command
 
 ## [0.4.12]
 ### Fixed

@@ -28,3 +28,10 @@ class DateFormatError(WdcError):
         self.date = date
         self.message = f'The string {date} does not represent a valid date'
         super().__init__(self.message)
+
+
+class TaskOverlapError(WdcError):
+    def __init__(self, task_id: str):
+        self.task_id = task_id
+        self.message = f'The task {task_id} overlaps with existing tasks'
+        super().__init__(self.message)

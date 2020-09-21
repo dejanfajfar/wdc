@@ -1,8 +1,8 @@
 import secrets
 
-from wdc.helper.io import read_all_tasks, last_task, write_task, find_tasks, array_to_tags_string
-from wdc.classes import WdcTask, WdcTaskInfo
-from wdc.persistence.task_store import WdcTaskStore
+from wdc.helper.io import array_to_tags_string
+from wdc.classes import WdcTask
+from wdc.persistence.task_store import WdcTaskStore, find_stores
 from wdc.time import WdcTime, today, is_date_valid, is_time_valid, timestamp
 
 from typing import List
@@ -33,61 +33,35 @@ def start_work_task(start_time: str, end_time: str, tags: List[str], description
         description=description
     )
 
-    WdcTaskStore().add(new_task)
+    WdcTaskStore(new_task.date).add_and_save(new_task)
 
 
-def end_last_task(date: str, time: str):
+def end_last_task(date: str, time: str = WdcTime.now()):
     if not is_date_valid(date):
         raise ValueError(f'{date} is not a valid date format')
-
-    if time == '':
-        time = str(WdcTime.now())
 
     if not is_time_valid(time):
         raise ValueError(f'{date} is not a valid date format')
 
-    task = last_task(date)
+    task_store = WdcTaskStore(date)
+
+    task = task_store.last()
 
     task.end = time
     task.timestamp = timestamp()
 
-    write_task(task)
+    task_store.add_and_save(task)
 
 
-def list_tasks(date: str, show_all: bool) -> List[WdcTask]:
+def list_tasks(date: str) -> List[WdcTask]:
     if not is_date_valid(date):
         raise ValueError(f'{date} is not a valid date format')
 
-    tasks = read_all_tasks(date)
+    task_store = WdcTaskStore(date)
 
-    tasks = list(filter(lambda t: t.date == date, tasks))
+    tasks = task_store.get(lambda t: t.date == date)
 
-    if show_all:
-        return sorted(tasks, key=lambda t: int(t.timestamp))
-
-    else:
-        return_tasks = {}
-        for task in tasks:
-            if task.id not in return_tasks:
-                return_tasks[task.id] = task
-            else:
-                if int(return_tasks[task.id].timestamp) < int(task.timestamp):
-                    return_tasks[task.id] = task
-                else:
-                    continue
-
-        return sort_by_time(return_tasks.values())
-
-
-def get_task_info(task_id: str) -> WdcTaskInfo:
-    if task_id == '':
-        return None
-    tasks = find_tasks(task_id)
-
-    if not tasks:
-        return None
-
-    return WdcTaskInfo(tasks)
+    return sorted(tasks, key=lambda t: int(t.timestamp))
 
 
 def amend_task(task_id: str, tags: List[str] = [], start: str = '', end: str = '', message: str = '', date: str = ''):
@@ -100,12 +74,15 @@ def amend_task(task_id: str, tags: List[str] = [], start: str = '', end: str = '
     if date != '' and not is_time_valid(date):
         raise ValueError(f'The given date {date} is not valid')
 
-    task_info = get_task_info(task_id)
+    task_stores = find_stores(task_id)
 
-    if task_info is None:
-        raise ValueError(f'The given task id {task_id} did not resolve to a task')
+    if not task_stores:
+        # If an empty array is returned then we assume that no task with the given Id was found
+        raise ValueError(f'The provided task id {task_id} did not resolve to a task')
 
-    task = task_info.current
+    task_store = task_stores[0]
+
+    task = task_store.get(lambda t: t.id == task_id)[0]
 
     task.timestamp = timestamp()
     task.tags = array_to_tags_string(tags) if tags else task.tags
@@ -114,4 +91,4 @@ def amend_task(task_id: str, tags: List[str] = [], start: str = '', end: str = '
     task.description = message if message else task.description
     task.date = date if is_date_valid(date) else task.date
 
-    write_task(task)
+    task_store.add_and_save(task)
