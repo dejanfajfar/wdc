@@ -1,8 +1,7 @@
 import unittest
 
-from wdc.classes import WdcTask, WdcTimeSlot
+from wdc.classes import WdcTask
 from wdc.helper.taks import overlaps, predecessor
-from wdc.time import WdcTime
 
 
 class Overlaps(unittest.TestCase):

@@ -32,4 +32,3 @@ def predecessor(task: WdcTask, tasks: List[WdcTask]) -> Optional[WdcTask]:
     if predecessors_list:
         return predecessors_list[-1]
     return None
-
