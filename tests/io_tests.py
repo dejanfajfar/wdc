@@ -1,6 +1,6 @@
 import unittest
 
-from wdc.helper.io import array_to_tags_string
+from wdc.helper.tags import array_to_tags_string
 
 
 class ArrayToTagsString(unittest.TestCase):

@@ -1,6 +1,6 @@
 import secrets
 
-from wdc.helper.io import array_to_tags_string
+from wdc.helper.tags import array_to_tags_string
 from wdc.classes import WdcTask
 from wdc.helper.taks import overlaps, predecessor
 from wdc.persistence.task_store import WdcTaskStore, find_stores
