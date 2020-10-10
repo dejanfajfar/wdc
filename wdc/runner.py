@@ -8,7 +8,7 @@ from colored import fg, bg, attr
 
 from wdc.classes import WdcTask
 from wdc.controller.export_import import export_tasks, ExportType
-from wdc.exceptions import WdcError
+from wdc.exceptions import WdcError, TaskOverlapError
 from wdc.time import is_time_valid, is_date_valid, today, WdcTime
 from wdc.controller.calculator import calculate
 from wdc.controller.tasks import start_work_task, list_tasks, end_last_task, amend_task
@@ -185,7 +185,10 @@ def start(ctx, task_start, end, tag, message, date):
         print_error(f'Start time {task_start} of the task is an impossible time')
         ctx.exit()
 
-    start_work_task(task_start, end, list(tag), message, date)
+    try:
+        start_work_task(task_start, end, list(tag), message, date)
+    except TaskOverlapError as error:
+        print_error(error)
 
 
 @cli.command('list')

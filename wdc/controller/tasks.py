@@ -2,6 +2,7 @@ import secrets
 
 from wdc.helper.io import array_to_tags_string
 from wdc.classes import WdcTask
+from wdc.helper.taks import overlaps, predecessor
 from wdc.persistence.task_store import WdcTaskStore, find_stores
 from wdc.time import WdcTime, today, is_date_valid, is_time_valid, timestamp
 
@@ -33,7 +34,25 @@ def start_work_task(start_time: str, end_time: str, tags: List[str], description
         description=description
     )
 
-    WdcTaskStore(new_task.date).add_and_save(new_task)
+    store = WdcTaskStore(new_task.date)
+    tasks = list(store.get(lambda t: t.date == new_task.date))
+
+    if overlaps(new_task, tasks):
+        # TODO: error handling
+        return
+
+    predecessor_task = predecessor(new_task, tasks)
+
+    if not predecessor_task:
+        store.add_and_save(new_task)
+        return
+
+    if predecessor_task.end == '':
+        predecessor_task.end = new_task.start
+
+    store.add(predecessor_task)
+    store.add(new_task)
+    store.save()
 
 
 def end_last_task(date: str, time: str = WdcTime.now()):
@@ -74,7 +93,7 @@ def amend_task(task_id: str, tags: List[str] = [], start: str = '', end: str = '
     if date != '' and not is_time_valid(date):
         raise ValueError(f'The given date {date} is not valid')
 
-    task_stores = find_stores(task_id)
+    task_stores = list(find_stores(task_id))
 
     if not task_stores:
         # If an empty array is returned then we assume that no task with the given Id was found
@@ -82,7 +101,7 @@ def amend_task(task_id: str, tags: List[str] = [], start: str = '', end: str = '
 
     task_store = task_stores[0]
 
-    task = task_store.get(lambda t: t.id == task_id)[0]
+    task = list(task_store.get(lambda t: t.id == task_id))[0]
 
     task.timestamp = timestamp()
     task.tags = array_to_tags_string(tags) if tags else task.tags

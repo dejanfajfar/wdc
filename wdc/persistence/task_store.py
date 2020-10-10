@@ -3,7 +3,7 @@ from typing import List, Callable
 from wdc.classes import WdcTask
 from wdc.exceptions import TaskOverlapError
 from wdc.helper.io import read_all_tasks, write_tasks, find_tasks
-from wdc.helper.taks import would_task_overlap
+from wdc.helper.taks import overlaps
 from wdc.time import assert_date
 
 
@@ -20,7 +20,7 @@ class WdcTaskStore(object):
         write_tasks(self._tasks, self._date)
 
     def add(self, task: WdcTask):
-        if not would_task_overlap(task, self._tasks):
+        if not overlaps(task, self._tasks):
             if self.contains(task):
                 self._tasks = list(map(lambda t: task if t.id == task.id else t, self._tasks))
             else:
@@ -51,10 +51,5 @@ class WdcTaskStore(object):
 
 
 def find_stores(task_id: str) -> List[WdcTaskStore]:
-    tasks = find_tasks(task_id)
-    task_stores = []
-    if tasks:
-        for task in tasks:
-            task_stores = WdcTaskStore(task.date)
-
-    return task_stores
+    for task in find_tasks(task_id) or []:
+        yield WdcTaskStore(task.date)

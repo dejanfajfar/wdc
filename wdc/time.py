@@ -57,6 +57,10 @@ class WdcTime(object):
         now = datetime.now()
         return WdcTime(f'{now.hour:02d}{now.minute:02d}')
 
+    @staticmethod
+    def zero():
+        return WdcTime('0000')
+
     @property
     def minutes(self):
         return self.__rawTime[2:4]
@@ -100,7 +104,7 @@ class WdcTime(object):
         return self
 
     def __hash__(self):
-        return int(self.hours) + int(self.minutes)
+        return (int(self.hours) * 100) + int(self.minutes)
 
     def __str__(self):
         return self.__rawTime
@@ -119,3 +123,11 @@ class WdcTime(object):
 
     def __ge__(self, other):
         return hash(self) >= hash(other)
+
+    def __sub__(self, other):
+        newTime = WdcTime(self.__rawTime)
+
+        newTime.add_hours(-1 * int(other.hours))
+        newTime.add_minutes(-1 * int(self.minutes))
+
+        return newTime

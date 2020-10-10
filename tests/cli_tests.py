@@ -77,8 +77,9 @@ class StartWorkTaskFixture(unittest.TestCase):
 
     @unittest.skip('Experimentation integration test')
     def test_go(self):
-        self.cli_runner.invoke(cli, ['start', '0800', '--tag', 't1', '--tag', 't2', '--end',
-                                     '0900', '--message', 'description'])
+        self.cli_runner.invoke(cli, ['start', '0800', '--tag', 't1', '--tag', 't2', '--message', 'description'])
+        self.cli_runner.invoke(cli, ['start', '1000', '--tag', 't1', '--tag', 't2', '--end',
+                                     '1100', '--message', 'description'])
 
         result = self.cli_runner.invoke(cli, ['list'])
         print(result.output)
