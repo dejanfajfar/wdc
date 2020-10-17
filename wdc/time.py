@@ -73,16 +73,16 @@ def week_num(date_str: str) -> int:
     return date_time.isocalendar()[1]
 
 
-def week_start(week_num: str) -> Optional[datetime]:
+def week_start(week_num: str) -> Optional['WdcFullDate']:
     if not is_week_num_valid(week_num):
         return None
-    return datetime.strptime(week_num + '-1', '%G-W%V-%w')
+    return WdcFullDate(date_time=datetime.strptime(week_num + '-1', '%G-W%V-%w'))
 
 
-def week_end(week_num: str) -> Optional[datetime]:
+def week_end(week_num: str) -> Optional['WdcFullDate']:
     if not is_week_num_valid(week_num):
         return None
-    return datetime.strptime(week_num + '-0', '%G-W%V-%w')
+    return WdcFullDate(date_time=datetime.strptime(week_num + '-0', '%G-W%V-%w'))
 
 
 class WdcDate(object):
@@ -100,22 +100,20 @@ class WdcDate(object):
         if not self.is_valid():
             raise DateFormatError(self.__raw_date_str)
 
-    def set_from_date(self, date: datetime) -> None:
-        self.__raw_date_str = date.strftime(self.__date_format_string)
-        self.ensure_valid()
-
-    def set_from_str(self, date: str) -> None:
-        self.__raw_date_str = date
-        self.ensure_valid()
-
     def __str__(self):
         return self.__raw_date_str
 
+    def __eq__(self, other):
+        if not isinstance(other, WdcDate):
+            return False
+        return self.__raw_date_str == other.__raw_date_str
+
 
 class WdcFullDate(WdcDate):
-    def __init__(self, date_str: str = None):
+    def __init__(self, date_str: str = None, date_time: datetime = None):
         if not date_str and date_str != '':
-            super().__init__(DATE_FORMAT, DATE_REGEX, datetime.now().strftime(DATE_FORMAT))
+            super().__init__(DATE_FORMAT, DATE_REGEX,
+                             (date_time if date_time else datetime.now()).strftime(DATE_FORMAT))
         else:
             super().__init__(DATE_FORMAT, DATE_REGEX, date_str)
 

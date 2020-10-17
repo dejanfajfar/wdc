@@ -116,8 +116,8 @@ def amend_task(task_id: str, tags: List[str] = [], start: str = '', end: str = '
 
 def stats_for_week(week_str: str):
     if not week_str:
-        # week_num = current_week_num()
+        week_num = current_week_num()
         pass
 
-    # start_date = week_start(week_str)
-    # end_date = week_end(week_str)
+    start_date = week_start(week_str)
+    end_date = week_end(week_str)

@@ -160,10 +160,10 @@ class WeekNumberFixtures(unittest.TestCase):
         self.assertEqual('2020-W43', current_week_num())
 
     def test_start_of_week(self):
-        self.assertEqual(datetime(2020, 10, 19, 0, 0), week_start('2020-W43'))
+        self.assertEqual(WdcFullDate('2020-10-19'), week_start('2020-W43'))
 
     def test_end_of_week(self):
-        self.assertEqual(datetime(2020, 10, 25, 0, 0), week_end('2020-W43'))
+        self.assertEqual(WdcFullDate('2020-10-25'), week_end('2020-W43'))
 
 
 class WdcFullDateFixtures(unittest.TestCase):
