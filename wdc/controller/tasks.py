@@ -4,7 +4,8 @@ from wdc.helper.tags import array_to_tags_string
 from wdc.classes import WdcTask
 from wdc.helper.taks import overlaps, predecessor
 from wdc.persistence.task_store import WdcTaskStore, find_stores
-from wdc.time import WdcTime, today, is_date_valid, is_time_valid, timestamp
+from wdc.time import WdcTime, today, is_date_valid, is_time_valid, timestamp, current_week_num, week_start, week_end, \
+    WdcFullDate
 
 from typing import List
 
@@ -108,6 +109,15 @@ def amend_task(task_id: str, tags: List[str] = [], start: str = '', end: str = '
     task.start = start if is_time_valid(start) else task.start
     task.end = end if is_time_valid(end) else task.end
     task.description = message if message else task.description
-    task.date = date if is_date_valid(date) else task.date
+    task.date = date if WdcFullDate(date).is_valid() else task.date
 
     task_store.add_and_save(task)
+
+
+def stats_for_week(week_str: str):
+    if not week_str:
+        # week_num = current_week_num()
+        pass
+
+    # start_date = week_start(week_str)
+    # end_date = week_end(week_str)

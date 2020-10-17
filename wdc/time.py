@@ -1,8 +1,14 @@
 import re
 from datetime import datetime
 from time import time
+from typing import Optional
 
 from wdc.exceptions import TimeFormatError, DateFormatError
+
+DATE_FORMAT = '%Y-%m-%d'
+DATE_REGEX = r"(19|20)\d\d-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])"
+MONTH_FORMAT = '%Y%m'
+WEEK_FORMAT = '%G-W%V'
 
 
 def assert_time(time_str: str) -> None:
@@ -11,7 +17,7 @@ def assert_time(time_str: str) -> None:
 
 
 def assert_date(date_str: str) -> None:
-    if not is_date_valid(date_str):
+    if not WdcFullDate(date_str).is_valid():
         raise DateFormatError(date_str)
 
 
@@ -29,19 +35,89 @@ def is_date_valid(date_str: str) -> bool:
 
 def today() -> str:
     now = datetime.now()
-    return now.strftime('%Y-%m-%d')
+    return now.strftime(DATE_FORMAT)
 
 
 def to_date_no_day(date_str: str) -> str:
     assert_date(date_str)
 
-    date = datetime.strptime(date_str, '%Y-%m-%d')
+    date = datetime.strptime(date_str, DATE_FORMAT)
 
-    return date.strftime('%Y%m')
+    return date.strftime(MONTH_FORMAT)
 
 
 def timestamp() -> str:
     return str(int(time() * 1000))
+
+
+def current_week_num() -> str:
+    return datetime.now().strftime(WEEK_FORMAT)
+
+
+def is_week_num_valid(week_num_str: str) -> bool:
+    if week_num_str is None:
+        return False
+    return re.match(r"\d{4}-W\d{2}", week_num_str) is not None
+
+
+def parse_date_str(date_str: str) -> Optional[datetime]:
+    if not is_date_valid(date_str):
+        return None
+    return datetime.strptime(date_str, DATE_FORMAT)
+
+
+def week_num(date_str: str) -> int:
+    date_time = parse_date_str(date_str)
+    if not date_time:
+        return 0
+    return date_time.isocalendar()[1]
+
+
+def week_start(week_num: str) -> Optional[datetime]:
+    if not is_week_num_valid(week_num):
+        return None
+    return datetime.strptime(week_num + '-1', '%G-W%V-%w')
+
+
+def week_end(week_num: str) -> Optional[datetime]:
+    if not is_week_num_valid(week_num):
+        return None
+    return datetime.strptime(week_num + '-0', '%G-W%V-%w')
+
+
+class WdcDate(object):
+    def __init__(self, format_string: str, regex: str, date_str: str = None):
+        self.__date_format_string = format_string
+        self.__date_regex = regex
+        self.__raw_date_str = date_str
+
+    def is_valid(self) -> bool:
+        if self.__raw_date_str is None:
+            return False
+        return re.match(self.__date_regex, self.__raw_date_str) is not None
+
+    def ensure_valid(self) -> None:
+        if not self.is_valid():
+            raise DateFormatError(self.__raw_date_str)
+
+    def set_from_date(self, date: datetime) -> None:
+        self.__raw_date_str = date.strftime(self.__date_format_string)
+        self.ensure_valid()
+
+    def set_from_str(self, date: str) -> None:
+        self.__raw_date_str = date
+        self.ensure_valid()
+
+    def __str__(self):
+        return self.__raw_date_str
+
+
+class WdcFullDate(WdcDate):
+    def __init__(self, date_str: str = None):
+        if not date_str and date_str != '':
+            super().__init__(DATE_FORMAT, DATE_REGEX, datetime.now().strftime(DATE_FORMAT))
+        else:
+            super().__init__(DATE_FORMAT, DATE_REGEX, date_str)
 
 
 class WdcTime(object):

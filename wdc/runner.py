@@ -2,16 +2,15 @@ import os
 from typing import List
 
 import click
-
 import termtables as tt
 from colored import fg, bg, attr
 
 from wdc.classes import WdcTask
-from wdc.controller.export_import import export_tasks, ExportType
-from wdc.exceptions import WdcError, TaskOverlapError
-from wdc.time import is_time_valid, is_date_valid, today, WdcTime
 from wdc.controller.calculator import calculate
+from wdc.controller.export_import import export_tasks, ExportType
 from wdc.controller.tasks import start_work_task, list_tasks, end_last_task, amend_task
+from wdc.exceptions import WdcError, TaskOverlapError
+from wdc.time import is_time_valid, today, WdcTime, WdcFullDate
 
 
 def validate_break_duration_callback(ctx, param, value):
@@ -33,7 +32,7 @@ def validate_time_callback(ctx, param, value):
 def validate_date_callback(ctx, param, value):
     if not param.required and value == '':
         return value
-    if is_date_valid(value):
+    if WdcFullDate(value).is_valid():
         return value
     else:
         return today()
@@ -359,6 +358,14 @@ def export(ctx, date, output, csv, pipe, raw):
 
 @cli.command()
 @click.pass_context
+@click.option(
+    '-w',
+    '--week',
+    default=False,
+    show_default=True,
+    type=str,
+    is_flag=True,
+    help='')
 def stats(ctx):
     pass
 

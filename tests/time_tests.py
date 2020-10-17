@@ -1,8 +1,11 @@
 import unittest
+from datetime import datetime
+
 from freezegun import freeze_time
 
 from wdc.exceptions import TimeFormatError, DateFormatError
-from wdc.time import WdcTime, is_time_valid, today, is_date_valid, timestamp, assert_time, assert_date
+from wdc.time import WdcTime, is_time_valid, today, timestamp, assert_time, assert_date, \
+    current_week_num, week_start, week_end, WdcFullDate
 
 
 class WdcTimeFixture(unittest.TestCase):
@@ -120,19 +123,6 @@ class TodayFixture(unittest.TestCase):
         self.assertEqual('2019-10-25', test_result)
 
 
-class IsDateValidFixture(unittest.TestCase):
-    def test_valid(self):
-        self.assertTrue(is_date_valid('2020-10-25'))
-        self.assertTrue(is_date_valid('1980-07-01'))
-
-    def test_invalid(self):
-        self.assertFalse(is_date_valid('2000-7-1'))
-        self.assertFalse(is_date_valid('1800-07-31'))
-        self.assertFalse(is_date_valid('2000-40-01'))
-        self.assertFalse(is_date_valid('2000-07-40'))
-        self.assertFalse(is_date_valid(''))
-
-
 class TimestampFixture(unittest.TestCase):
     @freeze_time('2020-10-25 10:00:00')
     def test_valid(self):
@@ -162,3 +152,40 @@ class AssertDateFixture(unittest.TestCase):
         self.assertRaises(DateFormatError, assert_date, '2020.10.25')
         self.assertRaises(DateFormatError, assert_date, '2020.1.30')
         self.assertRaises(DateFormatError, assert_date, '2020.10.3')
+
+
+class WeekNumberFixtures(unittest.TestCase):
+    @freeze_time('2020-10-25 10:00:00')
+    def test_current_week_string(self):
+        self.assertEqual('2020-W43', current_week_num())
+
+    def test_start_of_week(self):
+        self.assertEqual(datetime(2020, 10, 19, 0, 0), week_start('2020-W43'))
+
+    def test_end_of_week(self):
+        self.assertEqual(datetime(2020, 10, 25, 0, 0), week_end('2020-W43'))
+
+
+class WdcFullDateFixtures(unittest.TestCase):
+    def test_is_valid_valid_date(self):
+        self.assertTrue(WdcFullDate('2020-10-25').is_valid())
+        self.assertTrue(WdcFullDate('1980-07-01').is_valid())
+
+    def test_is_valid_invalid_date(self):
+        self.assertFalse(WdcFullDate('2000-7-1').is_valid())
+        self.assertFalse(WdcFullDate('1800-07-31').is_valid())
+        self.assertFalse(WdcFullDate('2000-40-01').is_valid())
+        self.assertFalse(WdcFullDate('2000-07-40').is_valid())
+        self.assertFalse(WdcFullDate('').is_valid())
+
+    def test_ensure_valid_valid_date(self):
+        self.assertIsNone(WdcFullDate('2020-10-25').ensure_valid())
+        self.assertIsNone(WdcFullDate('1980-07-01').ensure_valid())
+
+    def test_ensure_valid_invalid_date(self):
+        with self.assertRaises(DateFormatError):
+            WdcFullDate('200-7-9').ensure_valid()
+
+    @freeze_time('2020-10-25')
+    def test_today(self):
+        self.assertEqual('2020-10-25', str(WdcFullDate()))

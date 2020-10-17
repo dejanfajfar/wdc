@@ -1,6 +1,7 @@
 from typing import List, Optional
 
 from wdc.classes import WdcTask, WdcTimeSlotComparison
+from wdc.time import week_num
 
 
 def overlaps(task: WdcTask, tasks: List[WdcTask]) -> bool:
@@ -32,3 +33,10 @@ def predecessor(task: WdcTask, tasks: List[WdcTask]) -> Optional[WdcTask]:
     if predecessors_list:
         return predecessors_list[-1]
     return None
+
+
+def task_week_number(task: WdcTask) -> int:
+    if not task:
+        return 0
+
+    return week_num(task.date)
