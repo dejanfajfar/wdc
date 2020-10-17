@@ -1,24 +1,24 @@
 import csv
 from os import listdir
 from os.path import isfile, join
+from pathlib import Path
+from typing import List
 
 import wdc.settings as settings
 from wdc.classes import WdcTask, to_array, to_task
-from wdc.time import is_date_valid, to_date_no_day
-from pathlib import Path
-from typing import List
+from wdc.time import WdcMonthDate
 
 HOME_DIR_PATH = Path.joinpath(Path.home(), settings.HOME_DIR)
 
 
-def task_file_path(date: str):
-    if not is_date_valid(date):
+def task_file_path(date: WdcMonthDate) -> Path:
+    if not date and not date.is_valid():
         raise ValueError(f'{date} is not a valid date')
 
-    return Path.joinpath(HOME_DIR_PATH, f'{to_date_no_day(date)}.csv')
+    return Path.joinpath(HOME_DIR_PATH, f'{date}.csv')
 
 
-def write_tasks(tasks: List[WdcTask], date: str = ""):
+def write_tasks(tasks: List[WdcTask], date: WdcMonthDate):
     HOME_DIR_PATH.mkdir(parents=True, exist_ok=True)
 
     with open(str(task_file_path(date)), 'w', newline='') as file:
@@ -27,8 +27,8 @@ def write_tasks(tasks: List[WdcTask], date: str = ""):
             csv_writer.writerow(to_array(task))
 
 
-def read_all_tasks(date: str) -> List[WdcTask]:
-    if not is_date_valid(date):
+def read_all_tasks(date: WdcMonthDate) -> List[WdcTask]:
+    if not date or not date.is_valid():
         raise ValueError(f'{date} is not a valid date')
 
     file_path = task_file_path(date)

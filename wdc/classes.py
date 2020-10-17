@@ -1,8 +1,9 @@
+import math
 from dataclasses import dataclass
 from enum import Enum
 from typing import List
 
-from wdc.time import timestamp as ts, WdcTime
+from wdc.time import timestamp as ts, WdcTime, WdcFullDate
 
 
 @dataclass
@@ -26,6 +27,10 @@ class WdcTask(object):
         if self.end == '':
             return WdcTime.zero()
         return WdcTime(self.end)
+
+    @property
+    def date_obj(self):
+        return WdcFullDate(self.date)
 
     @property
     def slot(self):
@@ -125,3 +130,24 @@ class WdcTimeSlot(object):
 
     def __gt__(self, other):
         return self.compare_with(other) == WdcTimeSlotComparison.AFTER
+
+
+class WdcTimeSlotDuration(object):
+    def __init__(self, time_slot: WdcTimeSlot):
+        self._raw_slot = time_slot
+        raw_duration = time_slot.end - time_slot.start
+        self._duration = int(raw_duration.hours) * 60 + int(raw_duration.minutes)
+
+    @property
+    def hours(self):
+        return math.floor(self._duration / 60)
+
+    @property
+    def minutes(self):
+        return self._duration % 60
+
+    def time_str(self):
+        return f"{self.hours}:{self.minutes}"
+
+    def time_fraction_str(self):
+        return f'{round(self.hours + self.minutes / 60, 2)}'

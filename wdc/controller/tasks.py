@@ -1,5 +1,6 @@
 import secrets
 
+from wdc.analytics.task_analyser import analyse_tasks
 from wdc.helper.tags import array_to_tags_string
 from wdc.classes import WdcTask
 from wdc.helper.taks import overlaps, predecessor
@@ -77,7 +78,7 @@ def list_tasks(date: str) -> List[WdcTask]:
     if not is_date_valid(date):
         raise ValueError(f'{date} is not a valid date format')
 
-    task_store = WdcTaskStore(date)
+    task_store = WdcTaskStore(WdcFullDate(date).to_moth_date())
 
     tasks = task_store.get(lambda t: t.date == date)
 
@@ -114,10 +115,19 @@ def amend_task(task_id: str, tags: List[str] = [], start: str = '', end: str = '
     task_store.add_and_save(task)
 
 
-def stats_for_week(week_str: str):
-    if not week_str:
-        week_num = current_week_num()
-        pass
-
+def stats_for_week(week_str: str = current_week_num()):
     start_date = week_start(week_str)
     end_date = week_end(week_str)
+
+    if start_date.to_moth_date() == end_date.to_moth_date():
+        store1 = WdcTaskStore(start_date.to_moth_date())
+        store2 = WdcTaskStore(end_date.to_moth_date())
+
+        tasks = store1.get(lambda t: t.date_obj >= start_date) + store2.get(lambda t: t.date_obj <= end_date)
+
+    else:
+        store = WdcTaskStore(start_date.to_moth_date())
+
+        tasks = store.get(lambda t: end_date >= t.date_obj >= start_date)
+
+    analyse_tasks(tasks)

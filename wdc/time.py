@@ -8,6 +8,7 @@ from wdc.exceptions import TimeFormatError, DateFormatError
 DATE_FORMAT = '%Y-%m-%d'
 DATE_REGEX = r"(19|20)\d\d-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])"
 MONTH_FORMAT = '%Y%m'
+MONTH_REGEX = r"^\d{4}0?(0[1-9]|1[012])$"
 WEEK_FORMAT = '%G-W%V'
 
 
@@ -17,7 +18,7 @@ def assert_time(time_str: str) -> None:
 
 
 def assert_date(date_str: str) -> None:
-    if not WdcFullDate(date_str).is_valid():
+    if not re.match(DATE_REGEX, date_str) and not re.match(MONTH_REGEX, date_str):
         raise DateFormatError(date_str)
 
 
@@ -73,16 +74,16 @@ def week_num(date_str: str) -> int:
     return date_time.isocalendar()[1]
 
 
-def week_start(week_num: str) -> Optional['WdcFullDate']:
-    if not is_week_num_valid(week_num):
+def week_start(week_number: str) -> Optional['WdcFullDate']:
+    if not is_week_num_valid(week_number):
         return None
-    return WdcFullDate(date_time=datetime.strptime(week_num + '-1', '%G-W%V-%w'))
+    return WdcFullDate(date_time=datetime.strptime(week_number + '-1', '%G-W%V-%w'))
 
 
-def week_end(week_num: str) -> Optional['WdcFullDate']:
-    if not is_week_num_valid(week_num):
+def week_end(week_number: str) -> Optional['WdcFullDate']:
+    if not is_week_num_valid(week_number):
         return None
-    return WdcFullDate(date_time=datetime.strptime(week_num + '-0', '%G-W%V-%w'))
+    return WdcFullDate(date_time=datetime.strptime(week_number + '-0', '%G-W%V-%w'))
 
 
 class WdcDate(object):
@@ -116,6 +117,20 @@ class WdcFullDate(WdcDate):
                              (date_time if date_time else datetime.now()).strftime(DATE_FORMAT))
         else:
             super().__init__(DATE_FORMAT, DATE_REGEX, date_str)
+
+    def to_moth_date(self) -> 'WdcMonthDate':
+        date_time = datetime.strptime(str(self), DATE_FORMAT)
+
+        return WdcMonthDate(date_time.strftime(MONTH_FORMAT))
+
+
+class WdcMonthDate(WdcDate):
+    def __init__(self, date_str: str = None, date_time: datetime = None):
+        if not date_str and date_str != '':
+            super().__init__(MONTH_FORMAT, MONTH_REGEX,
+                             (date_time if date_time else datetime.now()).strftime(MONTH_FORMAT))
+        else:
+            super().__init__(MONTH_FORMAT, MONTH_REGEX, date_str)
 
 
 class WdcTime(object):
@@ -202,6 +217,6 @@ class WdcTime(object):
         newTime = WdcTime(self.__rawTime)
 
         newTime.add_hours(-1 * int(other.hours))
-        newTime.add_minutes(-1 * int(self.minutes))
+        newTime.add_minutes(-1 * int(other.minutes))
 
         return newTime

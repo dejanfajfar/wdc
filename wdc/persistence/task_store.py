@@ -4,12 +4,11 @@ from wdc.classes import WdcTask
 from wdc.exceptions import TaskOverlapError
 from wdc.helper.io import read_all_tasks, write_tasks, find_tasks
 from wdc.helper.taks import overlaps
-from wdc.time import assert_date
+from wdc.time import WdcMonthDate
 
 
 class WdcTaskStore(object):
-    def __init__(self, date: str):
-        assert_date(date)
+    def __init__(self, date: WdcMonthDate):
         self._tasks = read_all_tasks(date)
         self.is_loaded = True
         self._date = date

@@ -1,5 +1,4 @@
 import unittest
-from datetime import datetime
 
 from freezegun import freeze_time
 
@@ -189,3 +188,7 @@ class WdcFullDateFixtures(unittest.TestCase):
     @freeze_time('2020-10-25')
     def test_today(self):
         self.assertEqual('2020-10-25', str(WdcFullDate()))
+
+    def test_to_month_date(self):
+        full_date = WdcFullDate('2020-10-25')
+        self.assertEqual('202010', str(full_date.to_moth_date()))
