@@ -133,21 +133,36 @@ class WdcTimeSlot(object):
 
 
 class WdcTimeSlotDuration(object):
-    def __init__(self, time_slot: WdcTimeSlot):
-        self._raw_slot = time_slot
-        raw_duration = time_slot.end - time_slot.start
-        self._duration = int(raw_duration.hours) * 60 + int(raw_duration.minutes)
+    def __init__(self, time_slot: WdcTimeSlot = None, duration: int = 0):
+        if time_slot:
+            raw_duration = time_slot.end - time_slot.start
+            self._duration = int(raw_duration.hours) * 60 + int(raw_duration.minutes)
+        else:
+            self._duration = duration
 
     @property
-    def hours(self):
+    def hours(self) -> int:
         return math.floor(self._duration / 60)
 
     @property
-    def minutes(self):
+    def minutes(self) -> int:
         return self._duration % 60
 
+    @property
+    def total_minutes(self) -> int:
+        return self._duration
+
     def time_str(self):
-        return f"{self.hours}:{self.minutes}"
+        return f"{self.hours:02d}:{self.minutes:02d}"
 
     def time_fraction_str(self):
-        return f'{round(self.hours + self.minutes / 60, 2)}'
+        return "{:.2f}".format(self.hours + self.minutes / 60)
+
+    def __str__(self):
+        return self.time_str()
+
+    def __add__(self, other):
+        if not other or not isinstance(other, WdcTimeSlotDuration):
+            return self
+
+        return WdcTimeSlotDuration(duration=self.total_minutes + other.total_minutes)

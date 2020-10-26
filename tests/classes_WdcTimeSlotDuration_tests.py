@@ -10,5 +10,9 @@ class DurationTests(unittest.TestCase):
 
         self.assertEqual(1, duration.hours)
         self.assertEqual(32, duration.minutes)
-        self.assertEqual('1:32', duration.time_str())
+
+    def test_duration_str_format(self):
+        duration = WdcTimeSlotDuration(WdcTimeSlot(WdcTime('0800'), WdcTime('0932')))
+
+        self.assertEqual('01:32', duration.time_str())
         self.assertEqual('1.53', duration.time_fraction_str())

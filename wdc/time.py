@@ -10,6 +10,7 @@ DATE_REGEX = r"(19|20)\d\d-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])"
 MONTH_FORMAT = '%Y%m'
 MONTH_REGEX = r"^\d{4}0?(0[1-9]|1[012])$"
 WEEK_FORMAT = '%G-W%V'
+WEEK_REGEX = r"^\d{4}-W(([0-4]?\d{1})|5[0-3]{1})$"
 
 
 def assert_time(time_str: str) -> None:
@@ -109,6 +110,9 @@ class WdcDate(object):
             return False
         return self.__raw_date_str == other.__raw_date_str
 
+    def __hash__(self):
+        return hash(self.__raw_date_str)
+
 
 class WdcFullDate(WdcDate):
     def __init__(self, date_str: str = None, date_time: datetime = None):
@@ -123,6 +127,11 @@ class WdcFullDate(WdcDate):
 
         return WdcMonthDate(date_time.strftime(MONTH_FORMAT))
 
+    def to_week_date(self) -> 'WdcWeekDate':
+        date_time = datetime.strptime(str(self), DATE_FORMAT)
+
+        return WdcWeekDate(date_time.strftime(WEEK_FORMAT))
+
 
 class WdcMonthDate(WdcDate):
     def __init__(self, date_str: str = None, date_time: datetime = None):
@@ -131,6 +140,15 @@ class WdcMonthDate(WdcDate):
                              (date_time if date_time else datetime.now()).strftime(MONTH_FORMAT))
         else:
             super().__init__(MONTH_FORMAT, MONTH_REGEX, date_str)
+
+
+class WdcWeekDate(WdcDate):
+    def __init__(self, date_str: str = None, date_time: datetime = None):
+        if not date_str and date_str != '':
+            super().__init__(WEEK_FORMAT, WEEK_REGEX,
+                             (date_time if date_time else datetime.now()).strftime(WEEK_FORMAT))
+        else:
+            super().__init__(WEEK_FORMAT, WEEK_REGEX, date_str)
 
 
 class WdcTime(object):

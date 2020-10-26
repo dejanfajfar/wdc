@@ -1,11 +1,13 @@
 import unittest
 from unittest.mock import patch
-from click.testing import CliRunner
 
-from wdc.controller.export_import import ExportType
-from wdc.classes import WdcTask
-from wdc.runner import cli, task_to_printout, print_info
+from click.testing import CliRunner
 from freezegun import freeze_time
+
+from wdc.analytics.task_analyser import analyse_tasks
+from wdc.classes import WdcTask
+from wdc.controller.export_import import ExportType
+from wdc.runner import cli, task_to_printout, print_info, print_week_stats
 
 
 class CalcCommandFixture(unittest.TestCase):
@@ -270,3 +272,25 @@ class PrintHelperFixture(unittest.TestCase):
         print_info('Test message')
 
         mock_print.assert_called_with('\n\x1b[38;5;0m\x1b[48;5;164minfo: Test message \x1b[0m\n')
+
+
+class PrintWeekStats(unittest.TestCase):
+    def setUp(self) -> None:
+        self.analysis_data = analyse_tasks([
+            WdcTask('0001', '2020-10-19', '0800', '1015', 'CUST1,task1', ''),
+            WdcTask('0001', '2020-10-19', '1015', '1030', 'CUST1,BESPR', ''),
+            WdcTask('0001', '2020-10-19', '1130', '1200', 'LUNCH', ''),
+            WdcTask('0001', '2020-10-19', '1200', '1600', 'CUST1,task1', ''),
+            WdcTask('0001', '2020-10-19', '1600', '1700', 'CUST1,tag1,tag2', ''),
+            WdcTask('0001', '2020-10-20', '0800', '0900', 'CUST1,task3', ''),
+            WdcTask('0001', '2020-10-20', '0900', '1015', 'CUST1,task1', ''),
+            WdcTask('0001', '2020-10-20', '1015', '1030', 'CUST1,BESPR', ''),
+            WdcTask('0001', '2020-10-20', '1130', '1200', 'LUNCH', ''),
+            WdcTask('0001', '2020-10-20', '1200', '1600', 'CUST1,task1', ''),
+            WdcTask('0001', '2020-10-20', '1600', '1700', 'CUST1,tag1,tag2', ''),
+            WdcTask('0001', '2020-10-21', '1000', '1200', 'CUST2', ''),
+            WdcTask('0001', '2020-10-21', '1200', '1500', 'CUST1,task1', ''),
+        ])
+
+    def test_print(self):
+        print_week_stats(self.analysis_data, 43)

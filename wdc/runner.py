@@ -5,10 +5,11 @@ import click
 import termtables as tt
 from colored import fg, bg, attr
 
+from wdc.analytics.task_analyser import TaskAnalysisResult
 from wdc.classes import WdcTask
 from wdc.controller.calculator import calculate
 from wdc.controller.export_import import export_tasks, ExportType
-from wdc.controller.tasks import start_work_task, list_tasks, end_last_task, amend_task
+from wdc.controller.tasks import start_work_task, list_tasks, end_last_task, amend_task, stats_for_week
 from wdc.exceptions import WdcError, TaskOverlapError
 from wdc.time import is_time_valid, today, WdcTime, WdcFullDate
 
@@ -97,6 +98,38 @@ def print_info(text: str) -> None:
         return
 
     print(f'{os.linesep}{fg(0)}{bg(164)}info: {text} {attr(0)}{os.linesep}')
+
+
+def print_week_stats(analysis_results: TaskAnalysisResult, week_num: int) -> None:
+    header = ['Date'] + sorted([*analysis_results.tags])
+    dates = [*analysis_results.dates]
+    data = []
+
+    for date in dates:
+        date_tags = [date]
+        for tag in sorted([*analysis_results.tags]):
+            if tag not in analysis_results.tags.keys() or date not in analysis_results.tags[tag].keys():
+                date_tags.append('')
+            else:
+                date_tags.append(analysis_results.tags[tag][date])
+
+        data.append(date_tags)
+
+    work_day_header = ['Date', 'Start', 'End', 'Duration']
+    work_day_data = []
+
+    for date in dates:
+        work_day_data.append([
+            date,
+            analysis_results.workday_start(date),
+            analysis_results.workday_end(date),
+            analysis_results.workday_duration(date)
+        ])
+
+    print(f'{bg(229)}{fg(8)}Statistics for week {week_num} {attr(0)}')
+    print(f'Total work time {bg(12)}{fg(8)}{analysis_results.total_work_time} {attr(0)}')
+    tt.print(header=work_day_header, data=work_day_data, style=tt.styles.rounded)
+    tt.print(header=header, data=data, style=tt.styles.rounded)
 
 
 def handle_error(error: WdcError) -> None:
@@ -363,11 +396,12 @@ def export(ctx, date, output, csv, pipe, raw):
     '--week',
     default=False,
     show_default=True,
-    type=str,
+    type=bool,
     is_flag=True,
-    help='')
-def stats(ctx):
-    pass
+    help='Week mode')
+def stats(ctx, week):
+    if week:
+        print_week_stats(stats_for_week())
 
 
 if __name__ == '__main__':

@@ -119,7 +119,7 @@ def stats_for_week(week_str: str = current_week_num()):
     start_date = week_start(week_str)
     end_date = week_end(week_str)
 
-    if start_date.to_moth_date() == end_date.to_moth_date():
+    if start_date.to_moth_date() != end_date.to_moth_date():
         store1 = WdcTaskStore(start_date.to_moth_date())
         store2 = WdcTaskStore(end_date.to_moth_date())
 
@@ -130,4 +130,4 @@ def stats_for_week(week_str: str = current_week_num()):
 
         tasks = store.get(lambda t: end_date >= t.date_obj >= start_date)
 
-    analyse_tasks(tasks)
+    return analyse_tasks(tasks)
