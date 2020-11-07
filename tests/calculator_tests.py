@@ -1,6 +1,7 @@
 import unittest
 
 from wdc.controller.calculator import calculate
+from wdc.time import WdcTime
 
 
 class CalculatorFixture(unittest.TestCase):
@@ -14,5 +15,5 @@ class CalculatorFixture(unittest.TestCase):
 
         for scenario in scenarios:
             with self.subTest(scenario):
-                result = calculate(scenario[0], scenario[1], scenario[2])
+                result = calculate(WdcTime(scenario[0]), scenario[1], WdcTime(scenario[2]))
                 self.assertEqual(str(result), scenario[3])

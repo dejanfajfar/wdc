@@ -1,17 +1,17 @@
 import os
-from typing import List
+from typing import List, Optional
 
 import click
 import termtables as tt
 from colored import fg, bg, attr
 
 from wdc.analytics.task_analyser import TaskAnalysisResult
-from wdc.classes import WdcTask
+from wdc.classes import WdcTask, WdcTags
 from wdc.controller.calculator import calculate
 from wdc.controller.export_import import export_tasks, ExportType
 from wdc.controller.tasks import start_work_task, list_tasks, end_last_task, amend_task, stats_for_week
 from wdc.exceptions import WdcError, TaskOverlapError
-from wdc.time import is_time_valid, today, WdcTime, WdcFullDate
+from wdc.time import today, WdcTime, WdcFullDate
 
 
 def validate_break_duration_callback(ctx, param, value):
@@ -21,22 +21,21 @@ def validate_break_duration_callback(ctx, param, value):
         return value
 
 
-def validate_time_callback(ctx, param, value):
+def validate_time_callback(ctx, param, value) -> Optional[WdcTime]:
     if not param.required and value == '':
-        return value
-    if is_time_valid(value):
-        return value
-    else:
-        raise click.BadParameter(f'{value} is not a valid time')
+        return None
+    try:
+        return WdcTime(value)
+    except ValueError as err:
+        raise click.BadParameter(err)
 
 
 def validate_date_callback(ctx, param, value):
+    # If the date is not required and not given then leave it as non defined
     if not param.required and value == '':
-        return value
-    if WdcFullDate(value).is_valid():
-        return value
-    else:
-        return today()
+        return None
+    date_obj = WdcFullDate(value)
+    return date_obj if date_obj.is_valid() else WdcFullDate(today())
 
 
 def validate_taskid_callback(ctx, param, value):
@@ -49,16 +48,12 @@ def validate_taskid_callback(ctx, param, value):
 
 
 def task_to_printout(task: WdcTask) -> List[str]:
-    start = WdcTime(task.start)
-    if task.end != '':
-        end = WdcTime(task.end)
-
     return [
         task.id,
-        task.date,
-        f'{start.hours}:{start.minutes}',
-        f'{end.hours}:{end.minutes}' if task.end != '' else task.end,
-        task.tags,
+        str(task.date),
+        f'{task.start.hours}:{task.start.minutes}',
+        f'{task.end.hours}:{task.end.minutes}',
+        str(task.tags),
         (task.description[:10] + '..') if task.description != '' else task.description
     ]
 
@@ -100,11 +95,12 @@ def print_info(text: str) -> None:
     print(f'{os.linesep}{fg(0)}{bg(164)}info: {text} {attr(0)}{os.linesep}')
 
 
-def print_week_stats(analysis_results: TaskAnalysisResult, week_num: int) -> None:
+def print_week_stats(analysis_results: TaskAnalysisResult) -> None:
     header = ['Date'] + sorted([*analysis_results.tags])
     dates = [*analysis_results.dates]
     data = []
 
+    # TODO: Join the two loops into one
     for date in dates:
         date_tags = [date]
         for tag in sorted([*analysis_results.tags]):
@@ -126,7 +122,7 @@ def print_week_stats(analysis_results: TaskAnalysisResult, week_num: int) -> Non
             analysis_results.workday_duration(date)
         ])
 
-    print(f'{bg(229)}{fg(8)}Statistics for week {week_num} {attr(0)}')
+    print(f'{bg(229)}{fg(8)}Statistics for week {attr(0)}')
     print(f'Total work time {bg(12)}{fg(8)}{analysis_results.total_work_time} {attr(0)}')
     tt.print(header=work_day_header, data=work_day_data, style=tt.styles.rounded)
     tt.print(header=header, data=data, style=tt.styles.rounded)
@@ -169,7 +165,7 @@ def cli(ctx, debug):
     callback=validate_time_callback,
     required=True,
     help='The optional duration of the standard workday given in hhmm format')
-def calc(ctx, workday_start, break_duration, workday_duration):
+def calc(ctx, workday_start: WdcTime, break_duration: int, workday_duration: WdcTime):
     wd_end = calculate(workday_start, break_duration, workday_duration)
 
     print(wd_end)
@@ -180,6 +176,7 @@ def calc(ctx, workday_start, break_duration, workday_duration):
 @click.argument(
     'task_start',
     type=str,
+    callback=validate_time_callback,
     required=True)
 @click.option(
     '-t',
@@ -199,6 +196,7 @@ def calc(ctx, workday_start, break_duration, workday_duration):
     '-e',
     '--end',
     default='',
+    required=False,
     show_default=True,
     type=str,
     callback=validate_time_callback,
@@ -212,13 +210,10 @@ def calc(ctx, workday_start, break_duration, workday_duration):
     callback=validate_date_callback,
     type=str,
     help='The date at which the task has happened')
-def start(ctx, task_start, end, tag, message, date):
-    if not is_time_valid(task_start):
-        print_error(f'Start time {task_start} of the task is an impossible time')
-        ctx.exit()
-
+def start(ctx, task_start: WdcTime, end: Optional[WdcTime], tag: List[str], message: str, date: WdcFullDate):
     try:
-        start_work_task(task_start, end, list(tag), message, date)
+        tags = WdcTags(tag)
+        start_work_task(task_start, end, tags, message, date)
     except TaskOverlapError as error:
         print_error(error)
 
@@ -231,7 +226,7 @@ def start(ctx, task_start, end, tag, message, date):
     callback=validate_date_callback,
     type=str,
     help='The date for which the tasks should be shown ')
-def list_all(ctx, date):
+def list_all(ctx, date: WdcFullDate):
     tasks = list_tasks(date)
 
     tasks_to_print = []
@@ -265,7 +260,7 @@ def list_all(ctx, date):
     type=str,
     callback=validate_time_callback,
     help='The time at which the work task was finished')
-def end(ctx, date, end):
+def end(ctx, date: WdcFullDate, end: WdcTime):
     end_last_task(date, end)
 
 
@@ -313,10 +308,11 @@ def end(ctx, date, end):
     callback=validate_date_callback,
     type=str,
     help='The date at which the task has happened')
-def amend(ctx, task_id, start, end, tag, message, date):
+def amend(ctx, task_id, start: WdcTime, end: WdcTime, tag: List[str], message: str, date: WdcFullDate):
     try:
-        amend_task(task_id, tags=list(tag), start=start, end=end, message=message, date=date)
-    except ValueError as error:
+        tags = WdcTags(tag)
+        amend_task(task_id, tags=tags, start=start, end=end, message=message, date=date)
+    except (ValueError, TaskOverlapError) as error:
         print_error(error)
 
 
@@ -359,18 +355,7 @@ def amend(ctx, task_id, start, end, tag, message, date):
     is_flag=True,
     help='Determines of all existing tasks should be returned or only the latest version of each'
 )
-def export(ctx, date, output, csv, pipe, raw):
-    """
-    The Export command implementation
-
-    :param ctx: The cli app context
-    :param date: The optional date to be exported (default is today)
-    :param output: The optional output file to which the tasks are to be exported
-    :param csv: Flag to denote that the export format should be CSV
-    :param pipe: A flag denoting that the export file content should be printed onto the stout stream
-    :param raw: If False then export only the latest version of each task. All if True
-    :return: Nothing
-    """
+def export(ctx, date: WdcFullDate, output, csv: bool, pipe: bool, raw: bool):
     selected_export_type = ExportType.JSON
     if csv:
         selected_export_type = ExportType.CSV
@@ -380,8 +365,7 @@ def export(ctx, date, output, csv, pipe, raw):
     try:
         result = export_tasks(date=date,
                               file_path=output,
-                              export_to=selected_export_type,
-                              export_all=raw)
+                              export_to=selected_export_type)
     except WdcError as error:
         handle_error(error)
 
@@ -389,19 +373,18 @@ def export(ctx, date, output, csv, pipe, raw):
         print(result)
 
 
-@cli.command()
+@cli.command('stats-w')
 @click.pass_context
-@click.option(
-    '-w',
-    '--week',
-    default=False,
-    show_default=True,
-    type=bool,
-    is_flag=True,
-    help='Week mode')
-def stats(ctx, week):
-    if week:
+@click.argument(
+    'week',
+    type=str,
+    default=''
+)
+def stats_week(ctx, week):
+    if week == '':
         print_week_stats(stats_for_week())
+    else:
+        print_week_stats(stats_for_week(week))
 
 
 if __name__ == '__main__':

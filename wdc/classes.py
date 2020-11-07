@@ -1,40 +1,43 @@
 import math
 from dataclasses import dataclass
 from enum import Enum
-from typing import List
+from typing import List, Optional
 
 from wdc.time import timestamp as ts, WdcTime, WdcFullDate
+
+
+class WdcTags(object):
+    def __init__(self, tags: List[str] = []):
+        self._raw_tags = tags
+
+    def __str__(self):
+        return ','.join(map(str, self.tags_arr))
+
+    @property
+    def tags_arr(self) -> List[str]:
+        return sorted(list(map(lambda t: t.upper(), self._raw_tags)))
+
+    @staticmethod
+    def from_str(tags_str: str) -> 'WdcTags':
+        return WdcTags(tags_str.split(','))
+
+    def is_empty(self) -> bool:
+        return self.__str__() == ''
 
 
 @dataclass
 class WdcTask(object):
     id: str
-    date: str
-    start: str
-    end: str
-    tags: str
+    date: WdcFullDate
+    start: WdcTime
+    end: Optional[WdcTime]
+    tags: WdcTags
     description: str
     timestamp: str = ts()
 
     @property
-    def start_time(self):
-        if self.start == '':
-            return WdcTime.zero()
-        return WdcTime(self.start)
-
-    @property
-    def end_time(self):
-        if self.end == '':
-            return WdcTime.zero()
-        return WdcTime(self.end)
-
-    @property
-    def date_obj(self):
-        return WdcFullDate(self.date)
-
-    @property
-    def slot(self):
-        return WdcTimeSlot(self.start_time, self.end_time)
+    def slot(self) -> 'WdcTimeSlot':
+        return WdcTimeSlot(self.start, self.end)
 
     def __eq__(self, other):
         return self.id == other.id and self.end == other.end and self.start == other.start and self.date == other.date
@@ -45,50 +48,34 @@ class WdcTask(object):
     def __lt__(self, other):
         return self.start >= other.end
 
+    def is_valid(self) -> bool:
+        if not self.id or not self.start or not self.timestamp:
+            return False
 
-def is_valid(task: WdcTask) -> bool:
-    """
-    Determines if a WdcTasks is valid as per definition
-    :param task: The task instance to be validated
-    :return: True if the WdcTask instance is valid, False if not
-    """
+        return True
 
-    if task is None:
-        return False
+    @staticmethod
+    def from_str_array(array: List[str]) -> 'WdcTask':
+        return WdcTask(
+            id=array[0],
+            date=WdcFullDate(array[1]),
+            start=WdcTime(array[2]),
+            end=WdcTime(array[3]) if array[3] != 'None' else None,
+            tags=WdcTags.from_str(array[4]),
+            description=array[5],
+            timestamp=array[6]
+        )
 
-    if not task.id or not task.start or not task.timestamp:
-        return False
-
-    return True
-
-
-def to_task(array: List[str]) -> WdcTask:
-    return WdcTask(
-        id=array[0],
-        date=array[1],
-        start=array[2],
-        end=array[3],
-        tags=array[4],
-        description=array[5],
-        timestamp=array[6]
-    )
-
-
-def to_array(task: WdcTask) -> List[str]:
-    return [
-        task.id,
-        task.date,
-        task.start,
-        task.end,
-        task.tags,
-        task.description,
-        task.timestamp
-    ]
-
-
-class WdcDate(object):
-    def __init__(self, date):
-        self._raw_date = date
+    def to_str_array(self) -> List[str]:
+        return [
+            self.id,
+            str(self.date),
+            str(self.start),
+            str(self.end),
+            str(self.tags),
+            self.description,
+            self.timestamp
+        ]
 
 
 class WdcTimeSlotComparison(Enum):
@@ -99,7 +86,7 @@ class WdcTimeSlotComparison(Enum):
 
 
 class WdcTimeSlot(object):
-    def __init__(self, start: WdcTime, end: WdcTime):
+    def __init__(self, start: WdcTime, end: Optional[WdcTime] = None):
         self.start = start
         self.end = end
 
@@ -121,6 +108,9 @@ class WdcTimeSlot(object):
             return WdcTimeSlotComparison.BEFORE
 
         return WdcTimeSlotComparison.OVERLAP
+
+    def is_ongoing(self) -> bool:
+        return self.end is None
 
     def __lt__(self, other):
         return self.compare_with(other) == WdcTimeSlotComparison.BEFORE

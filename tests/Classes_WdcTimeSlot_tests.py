@@ -41,7 +41,7 @@ class CompareWith(unittest.TestCase):
         self.assertEqual(slot1.compare_with(slot2), WdcTimeSlotComparison.BEFORE)
 
 
-class ComparissonOperators(unittest.TestCase):
+class ComparisonOperators(unittest.TestCase):
     def test_slot1_bigger_touching(self):
         slot1 = WdcTimeSlot(start=WdcTime('0800'), end=WdcTime('0900'))
         slot2 = WdcTimeSlot(start=WdcTime('0700'), end=WdcTime('0800'))

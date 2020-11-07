@@ -1,10 +1,10 @@
 import json
 from enum import Enum
 
-from wdc.classes import WdcTask, to_array
+from wdc.classes import WdcTask
 from wdc.controller.tasks import list_tasks
 from wdc.helper.io import write_file
-from wdc.time import today, to_date_no_day, assert_date
+from wdc.time import today, WdcFullDate
 
 
 class WdcTaskJsonEncoder(json.JSONEncoder):
@@ -12,9 +12,10 @@ class WdcTaskJsonEncoder(json.JSONEncoder):
         return {
             'id': o.id,
             'timestamp': o.timestamp,
-            'tags': o.tags,
-            'start': o.start,
-            'end': o.end,
+            'date': str(o.date),
+            'tags': str(o.tags),
+            'start': str(o.start),
+            'end': str(o.end),
             'message': o.description
         }
 
@@ -24,19 +25,17 @@ class ExportType(Enum):
     CSV = 2
 
 
-def export_tasks(date: str = '',
+def export_tasks(date: WdcFullDate = None,
                  file_path: str = '',
-                 export_to: ExportType = ExportType.JSON,
-                 export_all: bool = False) -> str:
-    if date == '':
-        date = today()
+                 export_to: ExportType = ExportType.JSON) -> str:
 
-    assert_date(date)
+    if not date:
+        date = WdcFullDate(today())
 
     if file_path == '':
-        file_path = f'./export_{to_date_no_day(date)}.{export_to.name}'
+        file_path = f'./export_{date.to_moth_date()}.{export_to.name}'
 
-    tasks = list_tasks(date, export_all)
+    tasks = list_tasks(date)
 
     task_dump = ''
 
@@ -44,7 +43,7 @@ def export_tasks(date: str = '',
         task_dump = json.dumps(tasks, indent=4, cls=WdcTaskJsonEncoder)
     elif export_to == ExportType.CSV:
         for task in tasks:
-            task_dump += ';'.join(to_array(task)) + '\n'
+            task_dump += ';'.join(task.to_str_array()) + '\n'
 
     write_file(task_dump, file_path)
 

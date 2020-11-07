@@ -1,9 +1,7 @@
 from wdc.time import WdcTime
 
 
-def calculate(start_time: str, break_duration: int, workday_duration: str):
-    start = WdcTime(start_time)
-    duration = WdcTime(workday_duration)
+def calculate(start: WdcTime, break_duration: int, duration: WdcTime):
 
     result = start + duration
     result.add_minutes(break_duration)

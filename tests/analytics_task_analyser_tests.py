@@ -3,7 +3,7 @@ import os
 import unittest
 
 from wdc.analytics.task_analyser import analyse_tasks
-from wdc.classes import to_task
+from wdc.classes import WdcTask
 from wdc.time import WdcFullDate
 
 TEST_DATA_FILENAME = os.path.join(os.path.dirname(__file__), 'data', 'analysis_data.csv')
@@ -12,7 +12,7 @@ TEST_DATA_FILENAME = os.path.join(os.path.dirname(__file__), 'data', 'analysis_d
 class AnalyserFixrture_GivenFullTimeSheet(unittest.TestCase):
     def setUp(self) -> None:
         with open(str(TEST_DATA_FILENAME), 'r') as file:
-            tasks = list(map(lambda x: to_task(x), list(csv.reader(file, delimiter=';'))))
+            tasks = list(map(lambda x: WdcTask.from_str_array(x), list(csv.reader(file, delimiter=';'))))
         self._result = analyse_tasks(tasks)
 
     def test_result_not_none(self):
@@ -32,4 +32,4 @@ class AnalyserFixrture_GivenFullTimeSheet(unittest.TestCase):
 
     def test_totals_per_tag(self):
         self.assertEqual("25:30", self._result.tag_total_time('CUS1').time_str())
-        self.assertEqual("03:15", self._result.tag_total_time('task1').time_str())
+        self.assertEqual("03:15", self._result.tag_total_time('TASK1').time_str())

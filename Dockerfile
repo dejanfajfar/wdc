@@ -11,5 +11,6 @@ LABEL "maintaner"="dejan@fajfar.com"
 WORKDIR /wdc
 
 COPY dist/*.whl .
+COPY tests/integration/*.* .
 
 RUN pip install *.whl

@@ -89,20 +89,16 @@ def analyse_tasks(tasks: List[WdcTask]) -> 'TaskAnalysisResult':
     task_analysis = TaskAnalysisResult()
     for task in tasks:
         duration = WdcTimeSlotDuration(task.slot)
-        task_analysis.add_work_item_duration(task.date_obj, duration)
+        task_analysis.add_work_item_duration(task.date, duration)
 
-        for tag in task.tags.split(','):
-            task_analysis.add_tag_duration(tag, task.date_obj, duration)
+        for tag in task.tags.tags_arr:
+            task_analysis.add_tag_duration(tag, task.date, duration)
 
     for date in task_analysis.dates:
-        start_wd = reduce(
-            lambda t1, t2: t1 if t1.start_time < t2.start_time else t2,
-            filter(lambda t: t.date_obj == date, tasks))
-        end_wd = reduce(
-            lambda t1, t2: t1 if t1.end_time > t2.end_time else t2,
-            filter(lambda t: t.date_obj == date, tasks))
+        start_wd = reduce(lambda t1, t2: t1 if t1.start < t2.start else t2, filter(lambda t: t.date == date, tasks))
+        end_wd = reduce(lambda t1, t2: t1 if t1.end > t2.end else t2, filter(lambda t: t.date == date, tasks))
 
-        task_analysis._dates_start[date] = start_wd.start_time
-        task_analysis._dates_end[date] = end_wd.end_time
+        task_analysis._dates_start[date] = start_wd.start
+        task_analysis._dates_end[date] = end_wd.end
 
     return task_analysis

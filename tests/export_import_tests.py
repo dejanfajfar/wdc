@@ -2,18 +2,19 @@ import json
 import unittest
 from unittest.mock import patch
 
-from wdc.classes import WdcTask
+from wdc.classes import WdcTask, WdcTags
 from wdc.controller.export_import import WdcTaskJsonEncoder, export_tasks, ExportType
+from wdc.time import WdcFullDate, WdcTime
 
 
 class WdcTaskJsonEncoderFixture(unittest.TestCase):
     def test_encode_single_instance(self):
         test_object = WdcTask(
             id='c411c941',
-            date='2020-10-25',
-            start='0930',
-            end='1000',
-            tags='home',
+            date=WdcFullDate('2020-10-25'),
+            start=WdcTime('0930'),
+            end=WdcTime('1000'),
+            tags=WdcTags(['home']),
             description='test description',
             timestamp='1595423306302'
         )
@@ -22,7 +23,8 @@ class WdcTaskJsonEncoderFixture(unittest.TestCase):
         self.assertEqual("""{
     "id": "c411c941",
     "timestamp": "1595423306302",
-    "tags": "home",
+    "date": "2020-10-25",
+    "tags": "HOME",
     "start": "0930",
     "end": "1000",
     "message": "test description"
@@ -31,19 +33,19 @@ class WdcTaskJsonEncoderFixture(unittest.TestCase):
     def test_encode_list(self):
         test_object = [WdcTask(
             id='c411c941',
-            date='2020-10-25',
-            start='0930',
-            end='1000',
-            tags='home',
+            date=WdcFullDate('2020-10-25'),
+            start=WdcTime('0930'),
+            end=WdcTime('1000'),
+            tags=WdcTags(['home']),
             description='test description',
             timestamp='1595423306302'
         ),
             WdcTask(
             id='c411c941',
-            date='2020-10-25',
-            start='0930',
-            end='1000',
-            tags='home',
+            date=WdcFullDate('2020-10-25'),
+            start=WdcTime('0930'),
+            end=WdcTime('1000'),
+            tags=WdcTags(['home']),
             description='test description',
             timestamp='1595423306302'
         )]
@@ -54,7 +56,8 @@ class WdcTaskJsonEncoderFixture(unittest.TestCase):
     {
         "id": "c411c941",
         "timestamp": "1595423306302",
-        "tags": "home",
+        "date": "2020-10-25",
+        "tags": "HOME",
         "start": "0930",
         "end": "1000",
         "message": "test description"
@@ -62,7 +65,8 @@ class WdcTaskJsonEncoderFixture(unittest.TestCase):
     {
         "id": "c411c941",
         "timestamp": "1595423306302",
-        "tags": "home",
+        "date": "2020-10-25",
+        "tags": "HOME",
         "start": "0930",
         "end": "1000",
         "message": "test description"
@@ -79,10 +83,10 @@ class ExportTasksFixture(unittest.TestCase):
         mock_today.return_value = '2020-10-25'
         mock_reader.return_value = [WdcTask(
             id='c411c941',
-            date='2020-10-25',
-            start='0930',
-            end='1000',
-            tags='home',
+            date=WdcFullDate('2020-10-25'),
+            start=WdcTime('0930'),
+            end=WdcTime('1000'),
+            tags=WdcTags(['home']),
             description='test description',
             timestamp='1595423306302'
         )]
@@ -91,7 +95,8 @@ class ExportTasksFixture(unittest.TestCase):
     {
         "id": "c411c941",
         "timestamp": "1595423306302",
-        "tags": "home",
+        "date": "2020-10-25",
+        "tags": "HOME",
         "start": "0930",
         "end": "1000",
         "message": "test description"
@@ -110,10 +115,10 @@ class ExportTasksFixture(unittest.TestCase):
         mock_today.return_value = '2020-10-25'
         mock_reader.return_value = [WdcTask(
             id='c411c941',
-            date='2020-10-25',
-            start='0930',
-            end='1000',
-            tags='home',
+            date=WdcFullDate('2020-10-25'),
+            start=WdcTime('0930'),
+            end=WdcTime('1000'),
+            tags=WdcTags(['home']),
             description='test description',
             timestamp='1595423306302'
         )]
@@ -122,7 +127,8 @@ class ExportTasksFixture(unittest.TestCase):
     {
         "id": "c411c941",
         "timestamp": "1595423306302",
-        "tags": "home",
+        "date": "2020-10-25",
+        "tags": "HOME",
         "start": "0930",
         "end": "1000",
         "message": "test description"
@@ -143,15 +149,15 @@ class ExportTasksFixture(unittest.TestCase):
         mock_today.return_value = '2020-10-25'
         mock_reader.return_value = [WdcTask(
             id='c411c941',
-            date='2020-10-25',
-            start='0930',
-            end='1000',
-            tags='home',
+            date=WdcFullDate('2020-10-25'),
+            start=WdcTime('0930'),
+            end=WdcTime('1000'),
+            tags=WdcTags(['home']),
             description='test description',
             timestamp='1595423306302'
         )]
 
-        expected_dump = """c411c941;2020-10-25;0930;1000;home;test description;1595423306302"""
+        expected_dump = """c411c941;2020-10-25;0930;1000;HOME;test description;1595423306302"""
         result = export_tasks(export_to=ExportType.CSV)
 
         self.assertIn(expected_dump, mock_writer.call_args.args[0])
@@ -165,26 +171,26 @@ class ExportTasksFixture(unittest.TestCase):
         mock_today.return_value = '2020-10-25'
         mock_reader.return_value = [WdcTask(
             id='c411c941',
-            date='2020-10-25',
-            start='0930',
-            end='1000',
-            tags='home',
+            date=WdcFullDate('2020-10-25'),
+            start=WdcTime('0930'),
+            end=WdcTime('1000'),
+            tags=WdcTags(['home']),
             description='test description',
             timestamp='1595423306302'
         ),
             WdcTask(
                 id='c411c942',
-                date='2020-10-25',
-                start='0930',
-                end='1000',
-                tags='home',
+                date=WdcFullDate('2020-10-25'),
+                start=WdcTime('0930'),
+                end=WdcTime('1000'),
+                tags=WdcTags(['home']),
                 description='test description1',
                 timestamp='1595423306303'
         )
         ]
 
-        expected_dump = """c411c941;2020-10-25;0930;1000;home;test description;1595423306302
-c411c942;2020-10-25;0930;1000;home;test description1;1595423306303"""
+        expected_dump = """c411c941;2020-10-25;0930;1000;HOME;test description;1595423306302
+c411c942;2020-10-25;0930;1000;HOME;test description1;1595423306303"""
         result = export_tasks(export_to=ExportType.CSV)
 
         self.assertIn(expected_dump, mock_writer.call_args.args[0])

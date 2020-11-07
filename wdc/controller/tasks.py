@@ -1,70 +1,63 @@
 import secrets
+from typing import List, Optional
 
 from wdc.analytics.task_analyser import analyse_tasks
-from wdc.helper.tags import array_to_tags_string
-from wdc.classes import WdcTask
-from wdc.helper.taks import overlaps, predecessor
+from wdc.classes import WdcTask, WdcTags
+from wdc.helper.Ensure import Ensure
+from wdc.helper.taks import overlaps, ongoing
 from wdc.persistence.task_store import WdcTaskStore, find_stores
-from wdc.time import WdcTime, today, is_date_valid, is_time_valid, timestamp, current_week_num, week_start, week_end, \
-    WdcFullDate
-
-from typing import List
+from wdc.time import WdcTime, timestamp, current_week_num, week_start, week_end, WdcFullDate
 
 
 def sort_by_time(tasks: List[WdcTask], descending: bool = False) -> List[WdcTask]:
-    return sorted(tasks, key=lambda t: hash(WdcTime(t.start)), reverse=descending)
+    # TODO: Implement sorting into the WdcTime and WdcDate objects
+    return sorted(tasks, key=lambda t: hash(t.start), reverse=descending)
 
 
-def start_work_task(start_time: str, end_time: str, tags: List[str], description: str, date: str):
-    start = WdcTime(start_time)
-    end = WdcTime(end_time) if end_time else None
-
-    # If a date is provided then it has to be valid
-    if not is_date_valid(date) and date != '':
-        raise ValueError(f'{date} is not a valid date format')
-    # When no date is provided then we assume "today"
-    date = date if date else today()
+def start_work_task(start_time: WdcTime, end_time: Optional[WdcTime], tags: WdcTags, description: str,
+                    date: WdcFullDate):
+    Ensure(start_time).not_none('Start time is not provided')
+    Ensure(end_time).is_optional_instance_of(WdcTime, 'end_time is not a Time object')
+    Ensure(tags).not_none('Tags container not provided')
+    Ensure(date).not_none('Date was not provided').instance_of(
+        WdcFullDate).that_is(lambda d: d.is_valid, f'Date {date} is not valid')
 
     row_id = secrets.token_hex(4)
 
     new_task = WdcTask(
         id=row_id,
         date=date,
-        start=str(start),
-        end=str(end) if end is not None else '',
-        tags=array_to_tags_string(tags),
+        start=start_time,
+        end=end_time,
+        tags=tags,
         description=description
     )
 
-    store = WdcTaskStore(new_task.date)
+    store = WdcTaskStore(date.to_moth_date())
     tasks = list(store.get(lambda t: t.date == new_task.date))
 
     if overlaps(new_task, tasks):
         # TODO: error handling
         return
 
-    predecessor_task = predecessor(new_task, tasks)
+    predecessor_task = ongoing(tasks)
 
     if not predecessor_task:
         store.add_and_save(new_task)
         return
 
-    if predecessor_task.end == '':
-        predecessor_task.end = new_task.start
+    predecessor_task.end = new_task.start
 
     store.add(predecessor_task)
     store.add(new_task)
     store.save()
 
 
-def end_last_task(date: str, time: str = WdcTime.now()):
-    if not is_date_valid(date):
-        raise ValueError(f'{date} is not a valid date format')
+def end_last_task(date: WdcFullDate, time: WdcTime):
+    if not time:
+        time = WdcTime.now()
 
-    if not is_time_valid(time):
-        raise ValueError(f'{date} is not a valid date format')
-
-    task_store = WdcTaskStore(date)
+    task_store = WdcTaskStore(date.to_moth_date())
 
     task = task_store.last()
 
@@ -74,26 +67,22 @@ def end_last_task(date: str, time: str = WdcTime.now()):
     task_store.add_and_save(task)
 
 
-def list_tasks(date: str) -> List[WdcTask]:
-    if not is_date_valid(date):
-        raise ValueError(f'{date} is not a valid date format')
+def list_tasks(date: WdcFullDate) -> List[WdcTask]:
+    Ensure(date).not_none('No date provided').instance_of(WdcFullDate) \
+        .that_is(lambda d: d.is_valid, 'Provided date is not valid')
 
-    task_store = WdcTaskStore(WdcFullDate(date).to_moth_date())
+    task_store = WdcTaskStore(date.to_moth_date())
 
     tasks = task_store.get(lambda t: t.date == date)
 
     return sorted(tasks, key=lambda t: int(t.timestamp))
 
 
-def amend_task(task_id: str, tags: List[str] = [], start: str = '', end: str = '', message: str = '', date: str = ''):
-    if start != '' and not is_time_valid(start):
-        raise ValueError(f'The start time {start} is not a valid time')
-
-    if end != '' and not is_time_valid(end):
-        raise ValueError(f'The end time {end} is not a valid time')
-
-    if date != '' and not is_time_valid(date):
-        raise ValueError(f'The given date {date} is not valid')
+def amend_task(task_id: str, tags: WdcTags, start: Optional[WdcTime], end: Optional[WdcTime], message: str = '',
+               date: Optional[WdcFullDate] = None):
+    Ensure(start).is_optional_instance_of(WdcTime)
+    Ensure(end).is_optional_instance_of(WdcTime)
+    Ensure(date).is_optional_instance_of(WdcFullDate)
 
     task_stores = list(find_stores(task_id))
 
@@ -106,11 +95,11 @@ def amend_task(task_id: str, tags: List[str] = [], start: str = '', end: str = '
     task = list(task_store.get(lambda t: t.id == task_id))[0]
 
     task.timestamp = timestamp()
-    task.tags = array_to_tags_string(tags) if tags else task.tags
-    task.start = start if is_time_valid(start) else task.start
-    task.end = end if is_time_valid(end) else task.end
+    task.tags = str(tags) if not tags.is_empty() else task.tags
+    task.start = start if start else task.start
+    task.end = end if end else task.end
     task.description = message if message else task.description
-    task.date = date if WdcFullDate(date).is_valid() else task.date
+    task.date = date if date else task.date
 
     task_store.add_and_save(task)
 
@@ -128,6 +117,6 @@ def stats_for_week(week_str: str = current_week_num()):
     else:
         store = WdcTaskStore(start_date.to_moth_date())
 
-        tasks = store.get(lambda t: end_date >= t.date_obj >= start_date)
+        tasks = store.get(lambda t: end_date >= t.date >= start_date)
 
     return analyse_tasks(tasks)

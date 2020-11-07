@@ -30,7 +30,8 @@ setup(
         'wdc',
         'wdc.helper',
         'wdc.controller',
-        'wdc.persistence'
+        'wdc.persistence',
+        'wdc.analytics'
     ],
     entry_points={
         'console_scripts': ['wdc = wdc.runner:cli']

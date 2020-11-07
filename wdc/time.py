@@ -102,6 +102,9 @@ class WdcDate(object):
         if not self.is_valid():
             raise DateFormatError(self.__raw_date_str)
 
+    def to_datetime(self) -> datetime:
+        return datetime.strptime(self.__raw_date_str, self.__date_format_string)
+
     def __str__(self):
         return self.__raw_date_str
 
@@ -112,6 +115,26 @@ class WdcDate(object):
 
     def __hash__(self):
         return hash(self.__raw_date_str)
+
+    def __gt__(self, other):
+        if not isinstance(other, WdcDate):
+            return False
+        return self.to_datetime().__gt__(other.to_datetime())
+
+    def __ge__(self, other):
+        if not isinstance(other, WdcDate):
+            return False
+        return self.to_datetime().__ge__(other.to_datetime())
+
+    def __lt__(self, other):
+        if not isinstance(other, WdcDate):
+            return False
+        return self.to_datetime().__lt__(other.to_datetime())
+
+    def __le__(self, other):
+        if not isinstance(other, WdcDate):
+            return False
+        return self.to_datetime().__le__(other.to_datetime())
 
 
 class WdcFullDate(WdcDate):
@@ -152,12 +175,11 @@ class WdcWeekDate(WdcDate):
 
 
 class WdcTime(object):
-
-    def __init__(self, time):
+    def __init__(self, time: str):
         if is_time_valid(time):
             self.__rawTime = time
         else:
-            raise ValueError("{0} must be between 0 and 2359".format(time))
+            raise ValueError(f'Time \"{time}\" is not between \"0\" and \"2359\"')
 
     @staticmethod
     def now():

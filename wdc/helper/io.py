@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import List
 
 import wdc.settings as settings
-from wdc.classes import WdcTask, to_array, to_task
+from wdc.classes import WdcTask
 from wdc.time import WdcMonthDate
 
 HOME_DIR_PATH = Path.joinpath(Path.home(), settings.HOME_DIR)
@@ -24,7 +24,7 @@ def write_tasks(tasks: List[WdcTask], date: WdcMonthDate):
     with open(str(task_file_path(date)), 'w', newline='') as file:
         csv_writer = csv.writer(file, delimiter=';', quotechar='|', quoting=csv.QUOTE_MINIMAL)
         for task in tasks:
-            csv_writer.writerow(to_array(task))
+            csv_writer.writerow(task.to_str_array())
 
 
 def read_all_tasks(date: WdcMonthDate) -> List[WdcTask]:
@@ -37,7 +37,7 @@ def read_all_tasks(date: WdcMonthDate) -> List[WdcTask]:
         return []
 
     with open(str(file_path), 'r') as file:
-        return list(map(lambda x: to_task(x), list(csv.reader(file, delimiter=';'))))
+        return list(map(lambda x: WdcTask.from_str_array(x), list(csv.reader(file, delimiter=';'))))
 
 
 def find_tasks(task_id: str) -> List[WdcTask]:
@@ -48,7 +48,7 @@ def find_tasks(task_id: str) -> List[WdcTask]:
     ret_val = []
     for file in work_day_files:
         with open(Path.joinpath(HOME_DIR_PATH, file), 'r') as openFile:
-            tasks = list(map(lambda x: to_task(x), list(csv.reader(openFile, delimiter=';'))))
+            tasks = list(map(lambda x: WdcTask.from_str_array(x), list(csv.reader(openFile, delimiter=';'))))
             for task in tasks:
                 if task.id == task_id:
                     ret_val.append(task)
