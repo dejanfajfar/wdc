@@ -7,8 +7,8 @@ from freezegun import freeze_time
 from wdc.analytics.task_analyser import analyse_tasks
 from wdc.classes import WdcTask, WdcTags
 from wdc.controller.export_import import ExportType
-from wdc.runner import cli, task_to_printout, print_info, print_week_stats
-from wdc.time import WdcFullDate, WdcTime
+from wdc.runner import cli, task_to_printout, print_info, print_statistics
+from wdc.time import WdcFullDate, WdcTime, WdcMonthDate
 
 
 class CalcCommandFixture(unittest.TestCase):
@@ -317,4 +317,36 @@ class PrintWeekStats(unittest.TestCase):
         ])
 
     def test_print(self):
-        print_week_stats(self.analysis_data)
+        print_statistics(self.analysis_data)
+
+
+class MonthStatsFixture(unittest.TestCase):
+
+    def setUp(self):
+        self.cli_runner = CliRunner()
+
+    @patch('wdc.runner.stats_for_month')
+    def test_no_parameters_given(self, mock_controller):
+        mock_controller.return_value = None
+        result = self.cli_runner.invoke(cli, ['statm'])
+
+        self.assertEqual(0, result.exit_code)
+
+        self.assertTupleEqual(mock_controller.call_args.args, ())
+
+    @patch('wdc.runner.stats_for_month')
+    def test_valid_month_give(self, mock_controller):
+        mock_controller.return_value = None
+        result = self.cli_runner.invoke(cli, ['statm', '202011'])
+
+        self.assertEqual(0, result.exit_code)
+
+        self.assertTupleEqual(mock_controller.call_args.args, (WdcMonthDate('202011'),))
+
+    @patch('wdc.runner.stats_for_month')
+    def test_invalid_month_given(self, mock_controller):
+        result = self.cli_runner.invoke(cli, ['statm', 'NotAMoth'])
+
+        self.assertEqual(2, result.exit_code)
+
+        mock_controller.assert_not_called()

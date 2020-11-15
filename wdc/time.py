@@ -56,6 +56,10 @@ def current_week_num() -> str:
     return datetime.now().strftime(WEEK_FORMAT)
 
 
+def current_month_num() -> str:
+    return datetime.now().strftime(MONTH_FORMAT)
+
+
 def is_week_num_valid(week_num_str: str) -> bool:
     if week_num_str is None:
         return False

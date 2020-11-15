@@ -9,9 +9,10 @@ from wdc.analytics.task_analyser import TaskAnalysisResult
 from wdc.classes import WdcTask, WdcTags
 from wdc.controller.calculator import calculate
 from wdc.controller.export_import import export_tasks, ExportType
-from wdc.controller.tasks import start_work_task, list_tasks, end_last_task, amend_task, stats_for_week
+from wdc.controller.tasks import start_work_task, list_tasks, end_last_task, amend_task, stats_for_week, \
+    stats_for_month
 from wdc.exceptions import WdcError, TaskOverlapError
-from wdc.time import today, WdcTime, WdcFullDate
+from wdc.time import today, WdcTime, WdcFullDate, WdcMonthDate
 
 
 def validate_break_duration_callback(ctx, param, value):
@@ -45,6 +46,17 @@ def validate_taskid_callback(ctx, param, value):
         return value
     else:
         raise click.BadParameter(f'{value} is not a valid task id')
+
+
+def validate_month_callback(ctx, param, value):
+    if not param.required and value == '':
+        return None
+    else:
+        month = WdcMonthDate(value)
+        if month.is_valid():
+            return month
+        else:
+            raise click.BadParameter(f'"{value}" is not a valid month descriptor. T')
 
 
 def task_to_printout(task: WdcTask) -> List[str]:
@@ -95,7 +107,11 @@ def print_info(text: str) -> None:
     print(f'{os.linesep}{fg(0)}{bg(164)}info: {text} {attr(0)}{os.linesep}')
 
 
-def print_week_stats(analysis_results: TaskAnalysisResult) -> None:
+def print_statistics(analysis_results: TaskAnalysisResult) -> None:
+    if not analysis_results:
+        print_warning('No statistic foun    d for given time frame')
+        return
+
     header = ['Date'] + sorted([*analysis_results.tags])
     dates = [*analysis_results.dates]
     data = []
@@ -122,9 +138,9 @@ def print_week_stats(analysis_results: TaskAnalysisResult) -> None:
             analysis_results.workday_duration(date)
         ])
 
-    print(f'{bg(229)}{fg(8)}Statistics for week {attr(0)}')
-    print(f'Total work time {bg(12)}{fg(8)}{analysis_results.total_work_time} {attr(0)}')
+    print(f'{bg(184)}{fg(8)}Statistics from {analysis_results.first_date} to {analysis_results.last_date}{attr(0)}')
     tt.print(header=work_day_header, data=work_day_data, style=tt.styles.rounded)
+    print(f'Total work time in period {bg(153)}{fg(8)}{analysis_results.total_work_time} {attr(0)}')
     tt.print(header=header, data=data, style=tt.styles.rounded)
 
 
@@ -373,7 +389,7 @@ def export(ctx, date: WdcFullDate, output, csv: bool, pipe: bool, raw: bool):
         print(result)
 
 
-@cli.command('stats-w')
+@cli.command('statw')
 @click.pass_context
 @click.argument(
     'week',
@@ -382,9 +398,24 @@ def export(ctx, date: WdcFullDate, output, csv: bool, pipe: bool, raw: bool):
 )
 def stats_week(ctx, week):
     if week == '':
-        print_week_stats(stats_for_week())
+        print_statistics(stats_for_week())
     else:
-        print_week_stats(stats_for_week(week))
+        print_statistics(stats_for_week(week))
+
+
+@cli.command('statm')
+@click.pass_context
+@click.argument(
+    'month',
+    type=str,
+    default='',
+    callback=validate_month_callback
+)
+def stats_month(ctx, month):
+    if not month:
+        print_statistics(stats_for_month())
+    else:
+        print_statistics(stats_for_month(month))
 
 
 if __name__ == '__main__':

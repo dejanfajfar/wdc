@@ -125,7 +125,10 @@ class WdcTimeSlot(object):
 class WdcTimeSlotDuration(object):
     def __init__(self, time_slot: WdcTimeSlot = None, duration: int = 0):
         if time_slot:
-            raw_duration = time_slot.end - time_slot.start
+            if not time_slot.end or not time_slot.start:
+                raw_duration = WdcTime.zero()
+            else:
+                raw_duration = time_slot.end - time_slot.start
             self._duration = int(raw_duration.hours) * 60 + int(raw_duration.minutes)
         else:
             self._duration = duration

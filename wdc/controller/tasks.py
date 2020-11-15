@@ -6,7 +6,8 @@ from wdc.classes import WdcTask, WdcTags
 from wdc.helper.Ensure import Ensure
 from wdc.helper.taks import overlaps, ongoing
 from wdc.persistence.task_store import WdcTaskStore, find_stores
-from wdc.time import WdcTime, timestamp, current_week_num, week_start, week_end, WdcFullDate
+from wdc.time import WdcTime, timestamp, current_week_num, week_start, week_end, WdcFullDate, current_month_num, \
+    WdcMonthDate
 
 
 def sort_by_time(tasks: List[WdcTask], descending: bool = False) -> List[WdcTask]:
@@ -119,4 +120,12 @@ def stats_for_week(week_str: str = current_week_num()):
 
         tasks = store.get(lambda t: end_date >= t.date >= start_date)
 
-    return analyse_tasks(tasks)
+    return analyse_tasks(list(tasks))
+
+
+def stats_for_month(month: WdcMonthDate = current_month_num()):
+    store = WdcTaskStore(month)
+
+    tasks = store.get()
+
+    return analyse_tasks(list(tasks))

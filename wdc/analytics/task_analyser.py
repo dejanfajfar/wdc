@@ -7,7 +7,7 @@ from wdc.time import WdcFullDate, WdcTime
 
 class TaskAnalysisResult(object):
     def __init__(self):
-        self._dates = dict()
+        self._dates: Dict[WdcFullDate, WdcTimeSlotDuration] = dict()
         self._dates_start = dict()
         self._dates_end = dict()
         self._weeks = dict()
@@ -22,6 +22,14 @@ class TaskAnalysisResult(object):
     @property
     def dates(self) -> Dict[WdcFullDate, WdcTimeSlotDuration]:
         return self._dates
+
+    @property
+    def first_date(self) -> WdcFullDate:
+        return min(self._dates.keys())
+
+    @property
+    def last_date(self):
+        return max(self._dates.keys())
 
     def workday_duration(self, date: WdcFullDate) -> Optional[WdcTimeSlotDuration]:
         return self._dates[date] if date in self._dates else None
@@ -85,6 +93,12 @@ class TaskAnalysisResult(object):
             self._tags_by_tag[tag][date] += duration
 
 
+def tasks_for_day(tasks: List[WdcTask], date: WdcFullDate) -> List[WdcTask]:
+    for task in tasks:
+        if task.date == date:
+            yield task
+
+
 def analyse_tasks(tasks: List[WdcTask]) -> 'TaskAnalysisResult':
     task_analysis = TaskAnalysisResult()
     for task in tasks:
@@ -95,10 +109,11 @@ def analyse_tasks(tasks: List[WdcTask]) -> 'TaskAnalysisResult':
             task_analysis.add_tag_duration(tag, task.date, duration)
 
     for date in task_analysis.dates:
-        start_wd = reduce(lambda t1, t2: t1 if t1.start < t2.start else t2, filter(lambda t: t.date == date, tasks))
-        end_wd = reduce(lambda t1, t2: t1 if t1.end > t2.end else t2, filter(lambda t: t.date == date, tasks))
+        tasks_of_day = list(tasks_for_day(tasks, date))
+        first_task = reduce(lambda t1, t2: t1 if t1.start < t2.start else t2, tasks_of_day)
+        last_task = reduce(lambda t1, t2: t1 if t1.end > t2.end else t2, tasks_of_day)
 
-        task_analysis._dates_start[date] = start_wd.start
-        task_analysis._dates_end[date] = end_wd.end
+        task_analysis._dates_start[date] = first_task.start
+        task_analysis._dates_end[date] = last_task.end
 
     return task_analysis
